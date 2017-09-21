@@ -6,12 +6,12 @@
 favicon: /favicon.ico
 
 # Set default keywords (Use a comma to separate)
-keywords: "EVA625, Docker, Kubernetes, 容器"
+keywords: "EVA625, docker, kubernetes, 容器, hexo, github, spring, mybatis, travis, spring-cloud, oracle, mysql"
 
 # Set rss to false to disable feed link.
 # Leave rss as empty to use site's feed link.
 # Set rss to specific value if you have burned your feed already.
-rss: false
+rss:
 
 # Specify the date when the site was setup
 since: 2017
@@ -79,8 +79,8 @@ menu_icons:
 # Schemes
 #scheme: Muse
 #scheme: Mist
-scheme: Pisces
-#scheme: Gemini
+#scheme: Pisces
+scheme: Gemini
 
 
 # ---------------------------------------------------------------
@@ -444,7 +444,8 @@ busuanzi_count:
   site_pv_footer:
   # custom pv span for one page only
   page_pv: true
-  page_pv_header: <i class="fa fa-file-o"></i>
+#  page_pv_header: <i class="fa fa-file-o"></i>
+  page_pv_header: <i class="fa fa-eye"></i>
   page_pv_footer:
 
 
@@ -456,7 +457,7 @@ busuanzi_count:
 
 
 # Enable baidu push so that the blog will push the url to baidu automatically which is very helpful for SEO
-baidu_push: false
+baidu_push: true
 
 # Google Calendar
 # Share your recent schedule to others via calendar page

@@ -15,8 +15,7 @@ Docker 是一个开源的应用容器引擎，让开发者可以打包他们的�
 
 #### 1.1. Docker VS VM
 从下图可以看出，VM是一个运行在宿主机之上的完整的操作系统，VM运行自身操作系统会占用较多的CPU、内存、硬盘资源。Docker不同于VM，只包含应用程序以及依赖库，基于libcontainer运行在宿主机上，并处于一个隔离的环境中，这使得Docker更加轻量高效，启动容器只需几秒钟之内完成。由于Docker轻量、资源占用少，使得Docker可以轻易的应用到构建标准化的应用中。但Docker目前还不够完善，比如隔离效果不如VM，共享宿主机操作系统的一些基础库等；网络配置功能相对简单，主要以桥接方式为主；查看日志也不够方便灵活。
-![Docker VS VM](http://wx3.sinaimg.cn/mw690/4ca4c33cly1ffyplvxi7cj21hy0xkju5.jpg "Docker VS VM")
-另外，IBM发表了一篇关于虚拟机和Linux container性能对比的论文，论文中实际测试了虚拟机和Linux container在CPU、内存、存储IO以及网络的负载情况，结果显示Docker容器本身几乎没有什么开销，但是使用AUFS会一定的性能损耗，不如使用Docker Volume，Docker的NAT在较高网络数据传输中会引入较大的工作负载，带来额外的开销。不过container的性能与native相差不多，各方面的性能都一般等于或者优于虚拟机。Container和虚拟机在IO密集的应用中都需要调整优化以更好的支持IO操作，两者在IO密集型的应用中都应该谨慎使用。
+![Docker VS VM](http://wx3.sinaimg.cn/mw690/4ca4c33cly1ffyplvxi7cj21hy0xkju5.jpg "Docker VS VM")另外，IBM发表了一篇关于虚拟机和Linux container性能对比的论文，论文中实际测试了虚拟机和Linux container在CPU、内存、存储IO以及网络的负载情况，结果显示Docker容器本身几乎没有什么开销，但是使用AUFS会一定的性能损耗，不如使用Docker Volume，Docker的NAT在较高网络数据传输中会引入较大的工作负载，带来额外的开销。不过container的性能与native相差不多，各方面的性能都一般等于或者优于虚拟机。Container和虚拟机在IO密集的应用中都需要调整优化以更好的支持IO操作，两者在IO密集型的应用中都应该谨慎使用。
 
 #### 1.2. Docker主要特性
 1. 文件系统隔离：每个进程容器运行在完全独立的根文件系统里。
