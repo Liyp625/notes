@@ -31,9 +31,7 @@ C-->|编译之后push|D[Github的gh-pages分支]
 
 #### 2.2. 项目开启TravisCI
 在Github的项目列表中选择开启hexo的项目。
-
 ![项目开启TravisCI](http://wx4.sinaimg.cn/mw690/4ca4c33cly1fl8bom7uogj20sb0j8q9c.jpg "项目开启TravisCI")
-
 在项目的设置中开启`Build only if .travis.yml is  present`这一项，当travis.yml配置文件存在的时候才进行自动的持续集成。
 
 #### 2.3. 在Github中生成Access Token
@@ -42,6 +40,7 @@ C-->|编译之后push|D[Github的gh-pages分支]
 
 #### 2.4. 安装Travis
 >注意：需要安装Ruby环境
+
 ```bash
 # 安装travis
 gem install travis
