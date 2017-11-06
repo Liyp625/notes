@@ -71,7 +71,7 @@ drwxr-xr-x   3 root root  4096 Sep 20 14:54 themes
 ```bash
 hexo new "hi hexo"
 ```
-这是会在source/_post路径下生成一个名称为hi-hexo.md的Markdown文件，直接编辑该文件。而后执行如下命令。
+这是会在source/_posts路径下生成一个名称为hi-hexo.md的Markdown文件，直接编辑该文件。而后执行如下命令。
 ```bash
 # 清除以前生成的静态文件
 hexo clean

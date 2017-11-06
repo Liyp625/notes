@@ -5,6 +5,7 @@ categories:
   - 容器
 tags:
   - Kubernetes
+  - Dokcer
 ---
 Docker是一个很好的东西，特别是在和微服务相结合之后。但是在服务增多，同时需要增多服务节点时，过多的Docker容器的管理就变得很麻烦。Kubernetes就是一款Google发布的开源的容器集群管理软件，它非常利于对Docker容器集群做到自动化部署、管理，能弹性地调整容器的个数、扩展性能，自动维护容器。本文主要介绍Kubernetes的安装步骤以及部分常用插件的安装。
 

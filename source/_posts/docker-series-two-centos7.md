@@ -5,6 +5,7 @@ categories:
   - 容器
 tags:
   - Docker
+  - CentOS 7
 ---
 CentOS7的docker默认情况下是不能够执行systemctl命令的，抛出以下错误:
 `Failed to get D-Bus connection: Operation not permitted`
