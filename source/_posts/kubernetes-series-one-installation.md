@@ -218,8 +218,7 @@ KUBELET_ARGS="--cluster-dns=10.254.0.100 --cluster-domain=cluster.local"
 Kubernetes的WebUI
 1) 创建、下载dashboard的镜像
 `harbor.xxx.com/kube/k8s‐dashboard:1.6.0`
-2) 使用kubenetes安装文件中的yaml文件来创建资源
-，修改如下字段
+2) 使用kubenetes安装文件中的yaml文件来创建资源，修改如下字段
 ```bash
 image: harbor.xxx.com/kube/k8s-dashboard:1.6.0
 imagePullPolicy: IfNotPresent
