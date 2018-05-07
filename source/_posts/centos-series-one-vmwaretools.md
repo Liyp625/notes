@@ -11,7 +11,7 @@ tags:
 
 <!-- more -->
 
-### 1. 加载WMwareTools的镜像
+### 1. 加载VMwareTools的镜像
 首先启动CentOS 7,在VMware中点击上方“VM”，点击“Install VMware Tools...”（如已安装则显示“Reinstall VMware Tools...”）
 
 *也可以直接使用虚拟机的光驱来手动加载VMware安装目录下的linux.iso镜像*
@@ -137,7 +137,8 @@ Enjoy,
 
 在centos虚拟机上执行以下命令来挂载共享文件夹到/mnt/hgfs目录下
 ```bash
-mount -t vmhgfs .host:/ /mnt/hgfs
+# 使用mount命令进行挂载
+[root@localhost ~]# mount -t vmhgfs .host:/ /mnt/hgfs
 # data1即为共享文件夹
 [root@localhost ~]# ll /mnt/hgfs/
 total 0

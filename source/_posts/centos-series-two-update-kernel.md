@@ -19,7 +19,8 @@ Linux 3.10.0-693.21.1.el7.x86_64
 ### 2. 在 CentOS 7 中升级内核
 使用最简单的yum命令来升级内核
 ```bash
-yum update kernel
+# yum升级kernel
+[root@localhost ~]# yum update kernel
 ```
 升级完成后重启系统，来使用新的内核
 ### 3. 设置 GRUB 默认的内核版本（可选）
@@ -36,6 +37,6 @@ GRUB_DISABLE_RECOVERY="true"
 ```
 接下来运行下面的命令来重新创建内核配置
 ```bash
-grub2-mkconfig -o /boot/grub2/grub.cfg
+[root@localhost ~]# grub2-mkconfig -o /boot/grub2/grub.cfg
 ```
 重启并验证最新的内核已作为默认内核
