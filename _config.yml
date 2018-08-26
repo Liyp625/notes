@@ -12,10 +12,10 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://notes.itxds.com
+url: https://notes.itxds.com
 root: /
 #permalink: :year/:month/:day/:title/
-permalink: :year/:title/
+permalink: :title/
 permalink_defaults:
 
 # Directory
