@@ -90,3 +90,15 @@ search:
   field: post
   format: html
   limit: 10000
+
+# sitemap
+sitemap:
+  path: sitemap.xml
+baidusitemap:
+  path: baidusitemap.xml
+# push sitemap to baidu
+baidu_url_submit:
+  count: 10000
+  host: notes.itxds.com
+  token: 3gH9v1dPhrSIkJBs
+  path: baidu_urls.txt
