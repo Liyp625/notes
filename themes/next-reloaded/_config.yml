@@ -478,7 +478,7 @@ baidu_analytics: 0f62c4d008926c8d03183cabac353e2f
 
 # Disqus
 disqus:
-  enable: true
+  enable: false
   shortname: itxds-notes
   count: true
   lazyload: false
