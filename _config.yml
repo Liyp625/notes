@@ -7,7 +7,8 @@ title: EVA625's Notes
 subtitle: 开启一个孤独而欢快的程序之旅
 description: 一个走在从入门到放弃之路的人
 author: EVA625
-language: zh-Hans
+#language: zh-Hans
+language: zh-CN
 timezone:
 
 # URL
@@ -73,7 +74,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+theme: next-reloaded
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
@@ -96,6 +97,7 @@ sitemap:
   path: sitemap.xml
 baidusitemap:
   path: baidusitemap.xml
+
 # push sitemap to baidu
 baidu_url_submit:
   count: 10000

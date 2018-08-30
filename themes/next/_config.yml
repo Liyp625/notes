@@ -6,7 +6,7 @@
 favicon: /favicon.ico
 
 # Set default keywords (Use a comma to separate)
-keywords: "EVA625, docker, kubernetes, 容器, hexo, github, spring, mybatis, travis, spring-cloud, oracle, mysql"
+keywords: "EVA625,docker,kubernetes,容器,hexo,github,spring,mybatis,travis,spring-cloud,oracle,mysql,centos,linux,VMware"
 
 # Set rss to false to disable feed link.
 # Leave rss as empty to use site's feed link.
@@ -33,7 +33,7 @@ copyright: true
 canonical: true
 
 # Change headers hierarchy on site-subtitle (will be main site description) and on all post/pages titles for better SEO-optimization.
-seo: false
+seo: true
 
 # If true, will add site-subtitle to index page, added in main hexo config.
 # subtitle: Subtitle
@@ -362,7 +362,8 @@ changyan:
 # Google Webmaster tools verification setting
 # See: https://www.google.com/webmasters/
 google_site_verification: jn1x4mheWIJB97gwlSosY4bmJXkI9sKlFf6JEakgUdI
-baidu-site-verification: BlnZ2PRjUt
+baidu_site_verification: BlnZ2PRjUt
+bing_site_verification: 464E7EDB89C741F2DAE1C872296C31FE
 
 # Google Analytics
 #google_analytics:
