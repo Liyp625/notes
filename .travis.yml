@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - "6" # nodejs的版本
+cache:
+  directories:
+    - node_modules
+branches:
+  only:
+    - master # 设置自动化部署的源码分支
+before_install:
+  - export TZ='Asia/Shanghai' # 设置时区
+  - npm install -g hexo-cli
+install:
+  - npm install  # 安装依赖组件
+  - npm install hexo-generator-searchdb --save
+  - npm install hexo-deployer-git --save
+  # sitemap seo
+  - npm install hexo-baidu-url-submit --save
+  - npm install hexo-generator-sitemap --save
+  - npm install hexo-generator-baidu-sitemap --save
+before_script:
+  # 设置github账户信息
+  - git config --global user.name "Liyp625" #设置github用户名
+  - git config --global user.email "lyp625@gmail.com" #设置github用户邮箱
+  # github仓库操作 https://${REPO_TOKEN}:x-oauth-basic@github.com/SeayXu/seayxu.github.io.git
+  - sed -i'' "s~git@github.com:Liyp625/notes.git~https://${REPO_TOKEN}:x-oauth-basic@github.com/Liyp625/notes.git~" _config.yml
+# 执行的命令
+script:
+  - hexo clean
+  - hexo generate
+# 执行的成功后执行
+after_success:
+  - hexo deploy
