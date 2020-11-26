@@ -40,13 +40,26 @@ vmware-guestproxycerttool  vmware-namespace-cmd       vmware-toolbox-cmd        
 ### 3. 共享宿主机的文件夹
 在VMware软件的虚拟机设置来添加需要与虚拟机共享的主机文件夹。（VM -> Settings -> Options -> Shared folders）
 
+修改/etc/fuse.conf（解决挂载目录的权限问题）
+```bash
+vi /etc/fuse.conf
+```
+将user_allow_other取消注释（删除最前面的#）
+修改/etc/fuse.conf
+```bash
+# mount_max = 1000
+user_allow_other
+```
+
 在centos虚拟机上执行以下命令来挂载共享文件夹到/mnt/hgfs目录下
 ```bash
 # 挂载所有的共享文件夹
-vmhgfs-fuse .host:/ /mnt/hgfs
+vmhgfs-fuse -o allow_other .host:/ /mnt/hgfs
 # 只挂载/foo/bar文件夹
-vmhgfs-fuse .host:/foo/bar /mnt/hgfs
+vmhgfs-fuse -o allow_other .host:/foo/bar /mnt/hgfs
 ```
+> -o allow_other解决目录挂载之后权限的问题，允许其他用户使用
+
 验证是否成功
 ```bash
 ll /mnt/hgfs/
@@ -63,7 +76,7 @@ vi /etc/rc.local
 在文件的下面新增以下内容
 ```bash
 # mount shared floder
-vmhgfs-fuse .host:/ /mnt/hgfs
+vmhgfs-fuse -o allow_other .host:/ /mnt/hgfs
 ```
 /etc/rc.local其实是/etc/rc.d/rc.local的一个软连接，需要保证/etc/rc.d/rc.local具有可执行权限
 ```bash
