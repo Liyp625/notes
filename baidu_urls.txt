@@ -1,0 +1,14 @@
+https://notes.itxds.com/2020/15_npm_modify_cache_path/
+https://notes.itxds.com/2020/14_docker_modify_default_path/
+https://notes.itxds.com/2020/13_vs2013_win32_console/
+https://notes.itxds.com/2020/12_github_set_proxy/
+https://notes.itxds.com/2018/centos-series-four-disk-shrink/
+https://notes.itxds.com/2018/centos-series-three-open-vm-tools/
+https://notes.itxds.com/2018/centos-series-two-update-kernel/
+https://notes.itxds.com/2018/centos-series-one-vmwaretools/
+https://notes.itxds.com/2017/js-series-one-create-object/
+https://notes.itxds.com/2017/ci-travis-hexo-github-one/
+https://notes.itxds.com/2017/hexo-one-installation/
+https://notes.itxds.com/2017/kubernetes-series-one-installation/
+https://notes.itxds.com/2017/docker-series-two-centos7/
+https://notes.itxds.com/2017/docker-series-one-introduction/
