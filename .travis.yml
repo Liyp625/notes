@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "6" # nodejs的版本
+  - "11" # nodejs的版本
 cache:
   directories:
     - node_modules
