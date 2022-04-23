@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "11" # nodejs的版本
+  - "16" # nodejs的版本
 cache:
   directories:
     - node_modules
@@ -11,13 +11,16 @@ before_install:
   - export TZ='Asia/Shanghai' # 设置时区
   - npm install -g hexo-cli
 install:
-  - npm install  # 安装依赖组件
+  - npm install # 安装依赖组件
   - npm install hexo-generator-searchdb --save
   - npm install hexo-deployer-git --save
   # sitemap seo
   - npm install hexo-baidu-url-submit --save
   - npm install hexo-generator-sitemap --save
   - npm install hexo-generator-baidu-sitemap --save
+  # live2d
+  npm install hexo-helper-live2d --save
+  npm install live2d-widget-model-haruto --save
 before_script:
   # 设置github账户信息
   - git config --global user.name "Liyp625" #设置github用户名
