@@ -1,5 +1,5 @@
 ---
-title: 使用putty批量执行远程主机命令的bat脚本
+title: 使用putty客户端执行远程主机命令的bat脚本
 date: 2021-03-25 09:39:00
 categories:
   - bat脚本
@@ -110,6 +110,7 @@ goto :ok
 
 echo "远程服务器IP：%remoteIp%"
 echo %remoteDirPath%
+rem 查找目录下日期最新的文件
 for /f %%i in ('dir /b/o-d/a-d %jarDir%\%jarName%*.jar') do (
 	echo %%i
 	echo ">>> 开始上传文件"
