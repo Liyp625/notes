@@ -2,7 +2,7 @@
 title: 修改docker的默认存储路径
 date: 2020-11-24 12:50:36
 categories:
-  - 容器
+  - 容器技术
 tags:
   - Docker
 ---

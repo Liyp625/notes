@@ -2,10 +2,10 @@
 title: GitHub设置网络代理
 date: 2020-05-14 20:05:29
 categories:
-  - Git
+  - 开发工具
 tags:
-  - GitHub
   - Git
+  - GitHub
 ---
 家里的网络有时候连接GitHub仓库很慢，可以通过设置GitHub的网络代理来解决
 

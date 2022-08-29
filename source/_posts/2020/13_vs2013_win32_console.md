@@ -2,7 +2,7 @@
 title: VS2013在调试win32程序时附加显示Console窗口
 date: 2020-10-13 10:20:18
 categories:
-  - C++
+  - 开发工具
 tags:
   - VS2013
   - C++

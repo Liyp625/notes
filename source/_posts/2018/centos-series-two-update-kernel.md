@@ -4,7 +4,7 @@ date: 2018-05-7 09:11:52
 categories:
   - Linux
 tags:
-  - CentOS 7
+  - CentOS
 ---
 centos7最简单的升级内核方法
 

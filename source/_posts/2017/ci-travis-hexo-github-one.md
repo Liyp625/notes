@@ -4,8 +4,8 @@ date: 2017-09-20 15:19:47
 categories:
   - Blog
 tags:
-  - Travis CI
-  - Github Pages
+  - TravisCI
+  - GithubPages
   - Hexo
 ---
 自从使用Github Pages功能利用hexo创建了个人主页之后，就想利用持续集成来自动生成网页，于是著名的免费的持续集成网站Travis就进入了我的视野。

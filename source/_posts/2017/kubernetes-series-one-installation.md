@@ -2,7 +2,7 @@
 title: Kubernetes系列之一：安装步骤
 date: 2017-09-04 09:30:11
 categories:
-  - 容器
+  - 容器技术
 tags:
   - Kubernetes
   - Docker

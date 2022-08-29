@@ -2,11 +2,10 @@
 title: 使用shell脚本通过ssh批量执行命令
 date: 2021-03-26 10:40:00
 categories:
-  - shell脚本
+  - 脚本命令
 tags:
-  - shell
+  - Shell
   - Linux
-  - 脚本
 ---
 
 通过提供 ip 地址，在多个远程 linux 主机上执行的 bash 命令，包括 ssh、scp
@@ -23,7 +22,11 @@ shell 脚本类型:
 
 ### 2. shell 脚本内容
 
-> 该脚本连接远程 linux 是通过免密登录的方式
+> 该脚本连接远程 linux 是通过免密登录的方式，用户名密码登录可以借助sshpass命令完成
+```bash
+sshpass -p 密码 ssh root@localhost
+sshpass -p 密码 scp ~/file root@localhost:/tmp/file
+```
 
 #### 2.1. 主脚本内容
 

@@ -4,7 +4,7 @@ date: 2018-05-04 14:06:23
 categories:
   - Linux
 tags:
-  - CentOS 7
+  - CentOS
   - VMware
 ---
 在WMware上的Centos7虚拟机要与主机共享文件夹需要安装VMwareTools（通过命令行模式）。

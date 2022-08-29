@@ -4,7 +4,7 @@ date: 2018-08-15 10:21:39
 categories:
   - Linux
 tags:
-  - CentOS 7
+  - CentOS
   - VMware
 ---
 随着VMware虚拟机的使用，centos在宿主机上的磁盘占用也会越来越大，有时候即使删掉了centos的多余文件也不会感觉到磁盘占用在减少

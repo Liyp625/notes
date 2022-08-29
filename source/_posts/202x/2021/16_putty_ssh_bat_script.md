@@ -2,12 +2,11 @@
 title: 使用putty客户端执行远程主机命令的bat脚本
 date: 2021-03-25 09:39:00
 categories:
-  - bat脚本
+  - 脚本命令
 tags:
   - bat
+  - shell
   - putty
-  - Linux
-  - 脚本
 ---
 
 在 window 系统中，利用 Putty 工具实现 ssh 登录连接到远程的 Linux 系统上，可以实现 linux 中的远程 ssh、远程 scp 命令的功能

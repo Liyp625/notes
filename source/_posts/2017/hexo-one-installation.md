@@ -5,7 +5,7 @@ categories:
   - Blog
 tags:
   - Hexo
-  - Github Pages
+  - GithubPages
 ---
 之前自己搭建过一个博客是基于的xpleaf的[Blog_mini](https://github.com/xpleaf/Blog_mini)做了小优化的博客，那个博客是用Python+Flask做的，也蛮不错的，不过这个博客是需要购买云服务器的，得花money。最近突然想起来为何不弄一个免费的博客呢，这时Hexo进入我的视线，使用Hexo+Github Pages就可以免费搭建自己的个人博客网站。
 

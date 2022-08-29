@@ -2,7 +2,7 @@
 title: Docker系列之一：初识Docker
 date: 2017-05-26 05:58:49
 categories:
-  - 容器
+  - 容器技术
 tags:
   - Docker
 ---

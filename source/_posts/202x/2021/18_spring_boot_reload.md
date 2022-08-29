@@ -6,6 +6,7 @@ categories:
 tags:
   - Java
   - Springboot
+  - Maven
 ---
 
 通过设置实现 Springboot 项目在修改代码的时候，不进行冷启动，直接使用 springboot 提供的热部署功能
@@ -32,7 +33,7 @@ tags:
 </plugin>
 ```
 
-热部署生效后，日志中的线程名称是[restartedMain]，会加载两次，单比冷启动的时间要短很多
+热部署生效后，日志中的线程名称是[restartedMain]，会加载两次，但比冷启动的时间要短很多
 
 ### 2. 修改 IDEA 设置
 

@@ -4,7 +4,7 @@ date: 2018-08-14 16:34:31
 categories:
   - Linux
 tags:
-  - CentOS 7
+  - CentOS
   - VMware
 ---
 最近在给VMware的CentOS7的虚拟机安装VMwareTools的时候，发现有一个提示说是现在open-vm-tools已经替代了VMwareTools。
