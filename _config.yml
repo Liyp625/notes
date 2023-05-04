@@ -3,18 +3,18 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: EVA625's Notes
+title: Evan625's Notes
 subtitle: 开启一个孤独而欢快的程序之旅
 description: 一个走在从入门到放弃之路的人
 keywords:
-author: EVA625
+author: Evan625
 #language: zh-Hans
 language: zh-CN
 timezone: ""
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://notes.itxds.com
+url: https://notes.itxds.cn
 root: /
 #permalink: :year/:month/:day/:title/
 permalink: :title/
@@ -128,7 +128,7 @@ baidusitemap:
 # push sitemap to baidu
 baidu_url_submit:
   count: 10000
-  host: notes.itxds.com
+  host: notes.itxds.cn
   token: 3gH9v1dPhrSIkJBs
   path: baidu_urls.txt
 

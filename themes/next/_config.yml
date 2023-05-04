@@ -469,11 +469,11 @@ exturl_icon: true
 
 # Google Webmaster tools verification.
 # See: https://developers.google.com/search
-google_site_verification: jn1x4mheWIJB97gwlSosY4bmJXkI9sKlFf6JEakgUdI
+google_site_verification: 6zFVlrl6N8PGGHVJIVF2Q5KLnp--0DJ2YhC_E0aqCX8
 
 # Bing Webmaster tools verification.
 # See: https://www.bing.com/webmasters
-bing_site_verification: 464E7EDB89C741F2DAE1C872296C31FE
+bing_site_verification: 
 
 # Yandex Webmaster tools verification.
 # See: https://webmaster.yandex.ru
@@ -481,7 +481,7 @@ yandex_site_verification:
 
 # Baidu Webmaster tools verification.
 # See: https://ziyuan.baidu.com/site
-baidu_site_verification: 0gu6bcrey4
+baidu_site_verification: codeva-QNgakFdbCW
 
 # ---------------------------------------------------------------
 # Third Party Plugins & Services Settings
@@ -613,7 +613,7 @@ gitalk:
   client_id: a51be3c83bfd30b0be6d # GitHub Application Client ID
   client_secret: 2a36b54f3e13f496818cae25796a77d7f555f919 # GitHub Application Client Secret
   admin_user: Liyp625 # GitHub repo owner and collaborators, only these guys can initialize gitHub issues
-  distraction_free_mode: true # Facebook-like distraction free mode
+  distraction_free_mode: false # Facebook-like distraction free mode
   # When the official proxy is not available, you can change it to your own proxy address
   proxy: https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token # This is official proxy address
   # Gitalk's display language depends on user's browser or system environment
@@ -659,14 +659,14 @@ add_this_id:
 # Google Analytics
 # See: https://analytics.google.com
 google_analytics:
-  tracking_id: # <app_id>
+  tracking_id: G-YRK8ECNYES
   # By default, NexT will load an external gtag.js script on your site.
   # If you only need the pageview feature, set the following option to true to get a better performance.
   only_pageview: false
 
 # Baidu Analytics
 # See: https://tongji.baidu.com
-baidu_analytics: 0f62c4d008926c8d03183cabac353e2f
+baidu_analytics: 0464a826b7bdfd5e90180d9117fed20a
 
 # Growingio Analytics
 # See: https://www.growingio.com
