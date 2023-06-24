@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>使用Github和TravisCI对Hexo持续集成</title>
+    <url>/2017/ci-travis-hexo-github-one/</url>
+    <content><![CDATA[<p>自从使用Github Pages功能利用hexo创建了个人主页之后，就想利用持续集成来自动生成网页，于是著名的免费的持续集成网站Travis就进入了我的视野。</p>
+<span id="more"></span>
+
+<h3 id="1-持续集成的流程"><a href="#1-持续集成的流程" class="headerlink" title="1. 持续集成的流程"></a>1. 持续集成的流程</h3><p>使用hexo创建个人网站，在本地编辑文章完成后，提交推送到远程Github的master分支。由Travis检测到push后，自动从Github上拉取资源，执行hexo deploy命令，提交到Github的gh-pages分支，完成hexo个人网站的更新。</p>
+<p>大致的流程如下图所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">graph TD</span><br><span class="line">A[本地修改文件]--&gt;|push|B[Github的master分支]</span><br><span class="line">B--&gt;C[Travis监测到master分支的push]</span><br><span class="line">C--&gt;|编译之后push|D[Github的gh-pages分支]</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Travis配置"><a href="#2-Travis配置" class="headerlink" title="2. Travis配置"></a>2. Travis配置</h3><h4 id="2-1-登录Travis"><a href="#2-1-登录Travis" class="headerlink" title="2.1. 登录Travis"></a>2.1. 登录Travis</h4><p>直接在<a href="https://www.travis-ci.org/">Travis官网</a>中使用Github的帐号进行登录。</p>
+<h4 id="2-2-项目开启TravisCI"><a href="#2-2-项目开启TravisCI" class="headerlink" title="2.2. 项目开启TravisCI"></a>2.2. 项目开启TravisCI</h4><p>在Github的项目列表中选择开启hexo的项目。<br><img src="https://wx4.sinaimg.cn/mw690/4ca4c33cly1fl8bom7uogj20sb0j8q9c.jpg" alt="项目开启TravisCI" title="项目开启TravisCI"><br>在项目的设置中开启<code>Build only if .travis.yml is  present</code>这一项，当travis.yml配置文件存在的时候才进行自动的持续集成。</p>
+<h4 id="2-3-在Github中生成Access-Token"><a href="#2-3-在Github中生成Access-Token" class="headerlink" title="2.3. 在Github中生成Access Token"></a>2.3. 在Github中生成Access Token</h4><p>在Github的Settings -&gt; Developer settings -&gt; Personal access tokens中新增一个token，在生成这个token时注意要保存这个token（只显示一次）。</p>
+<h4 id="2-4-安装Travis"><a href="#2-4-安装Travis" class="headerlink" title="2.4. 安装Travis"></a>2.4. 安装Travis</h4><blockquote>
+<p>注意：需要安装Ruby环境</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装travis</span></span><br><span class="line">gem install travis</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在项目路径生成配置文件</span></span><br><span class="line"><span class="built_in">touch</span> .travis.yml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 登录travis，需要输入github的帐号和密码</span></span><br><span class="line">travis login</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成koten。REPO_TOKEN为变量名，TOKEN为Github生成的token</span></span><br><span class="line">travis encrypt <span class="string">&#x27;REPO_TOKEN=&lt;TOKEN&gt;&#x27;</span> --add</span><br></pre></td></tr></table></figure>
+<p>之后会在.trvis.yml文件中新增如下内容，把这些内容添加到后面的Travis配置文件中</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">env</span>:</span><br><span class="line">  global:</span><br><span class="line">    secure: bUuBpthJl9M9ybmpI0vkwHURwmh...</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-新增Travis的配置文件"><a href="#2-5-新增Travis的配置文件" class="headerlink" title="2.5. 新增Travis的配置文件"></a>2.5. 新增Travis的配置文件</h4><p>在hexo项目的根目录下新增.travis.yml配置文件，具体内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">language: node_js</span><br><span class="line">node_js:</span><br><span class="line">  - <span class="string">&quot;6&quot;</span> <span class="comment"># nodejs的版本</span></span><br><span class="line">cache:</span><br><span class="line">  directories:</span><br><span class="line">    - node_modules</span><br><span class="line">branches:</span><br><span class="line">  only:</span><br><span class="line">    - master <span class="comment"># 设置自动化部署的源码分支</span></span><br><span class="line"><span class="built_in">env</span>:</span><br><span class="line">  global:</span><br><span class="line">    secure: bUuBpthJl9M9ybmpI0vkwHURwmh...</span><br><span class="line">before_install:</span><br><span class="line">  - <span class="built_in">export</span> TZ=<span class="string">&#x27;Asia/Shanghai&#x27;</span> <span class="comment"># 设置时区</span></span><br><span class="line">  - npm install -g hexo-cli</span><br><span class="line">install:</span><br><span class="line">  - npm install  <span class="comment"># 安装依赖组件</span></span><br><span class="line">  - npm install hexo-generator-searchdb --save</span><br><span class="line">  - npm install hexo-deployer-git --save</span><br><span class="line">before_script:</span><br><span class="line">  <span class="comment"># 设置github账户信息</span></span><br><span class="line">  - git config --global user.name <span class="string">&quot;userName&quot;</span> <span class="comment">#设置github用户名</span></span><br><span class="line">  - git config --global user.email <span class="string">&quot;userEmail&quot;</span> <span class="comment">#设置github用户邮箱</span></span><br><span class="line">  <span class="comment"># github仓库操作_替换hexo的_config.yml配置文件中的原github地址，使用https+token来提交</span></span><br><span class="line">  <span class="comment"># git@github.com:userName/notes.git为原地址</span></span><br><span class="line">  <span class="comment"># https://$&#123;REPO_TOKEN&#125;:x-oauth-basic@github.com/userName/notes.git为替换后的新地址</span></span><br><span class="line">  <span class="comment"># 其中$&#123;REPO_TOKEN&#125;为生成token的变量名</span></span><br><span class="line">  - sed -i<span class="string">&#x27;&#x27;</span> <span class="string">&quot;s~git@github.com:userName/notes.git~https://<span class="variable">$&#123;REPO_TOKEN&#125;</span>:x-oauth-basic@github.com/userName/notes.git~&quot;</span> _config.yml</span><br><span class="line"><span class="comment"># 执行的命令</span></span><br><span class="line">script:</span><br><span class="line">  - hexo clean</span><br><span class="line">  - hexo generate</span><br><span class="line"><span class="comment"># 执行的成功后执行</span></span><br><span class="line">after_success:</span><br><span class="line">  - hexo deploy</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-提交新博文"><a href="#3-提交新博文" class="headerlink" title="3. 提交新博文"></a>3. 提交新博文</h3><p>在本地编辑新的博文，提交md文件至Github的远程仓库，然后可以在<a href="https://travis-ci.org/">Travis官网</a>查看项目自动化执行的过程和结果。</p>
+]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>TravisCI</tag>
+        <tag>GithubPages</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker系列之一：初识Docker</title>
+    <url>/2017/docker-series-one-introduction/</url>
+    <content><![CDATA[<p>近些年容器这个技术都比较火，刚好前端时间我们新项目的设计时就选用的容器+微服务的架构，因此在这记录下Docker的部署方法。</p>
+<span id="more"></span>
+
+<h3 id="1-Docker简介"><a href="#1-Docker简介" class="headerlink" title="1. Docker简介"></a>1. Docker简介</h3><p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 机器上，也可以实现虚拟化。容器是完全使用沙箱机制，相互之间不会有任何接口。</p>
+<h4 id="1-1-Docker-VS-VM"><a href="#1-1-Docker-VS-VM" class="headerlink" title="1.1. Docker VS VM"></a>1.1. Docker VS VM</h4><p>从下图可以看出，VM是一个运行在宿主机之上的完整的操作系统，VM运行自身操作系统会占用较多的CPU、内存、硬盘资源。Docker不同于VM，只包含应用程序以及依赖库，基于libcontainer运行在宿主机上，并处于一个隔离的环境中，这使得Docker更加轻量高效，启动容器只需几秒钟之内完成。由于Docker轻量、资源占用少，使得Docker可以轻易的应用到构建标准化的应用中。但Docker目前还不够完善，比如隔离效果不如VM，共享宿主机操作系统的一些基础库等；网络配置功能相对简单，主要以桥接方式为主；查看日志也不够方便灵活。<br><img src="https://wx3.sinaimg.cn/mw690/4ca4c33cly1ffyplvxi7cj21hy0xkju5.jpg" alt="Docker VS VM" title="Docker VS VM"><br>另外，IBM发表了一篇关于虚拟机和Linux container性能对比的论文，论文中实际测试了虚拟机和Linux container在CPU、内存、存储IO以及网络的负载情况，结果显示Docker容器本身几乎没有什么开销，但是使用AUFS会一定的性能损耗，不如使用Docker Volume，Docker的NAT在较高网络数据传输中会引入较大的工作负载，带来额外的开销。不过container的性能与native相差不多，各方面的性能都一般等于或者优于虚拟机。Container和虚拟机在IO密集的应用中都需要调整优化以更好的支持IO操作，两者在IO密集型的应用中都应该谨慎使用。</p>
+<h4 id="1-2-Docker主要特性"><a href="#1-2-Docker主要特性" class="headerlink" title="1.2. Docker主要特性"></a>1.2. Docker主要特性</h4><ol>
+<li>文件系统隔离：每个进程容器运行在完全独立的根文件系统里。</li>
+<li>资源隔离：可以使用cgroup为每个进程容器分配不同的系统资源，例如CPU和内存。</li>
+<li>网络隔离：每个进程容器运行在自己的网络命名空间里，拥有自己的虚拟接口和IP地址。</li>
+<li>写时复制：采用写时复制方式创建根文件系统，这让部署变得极其快捷，并且节省内存和硬盘空间。</li>
+<li>日志记录：Docker将会收集和记录每个进程容器的标准流（stdout&#x2F;stderr&#x2F;stdin），用于实时检索或批量检索。</li>
+<li>变更管理：容器文件系统的变更可以提交到新的映像中，并可重复使用以创建更多的容器。无需使用模板或手动配置。</li>
+<li>交互式Shell：Docker可以分配一个虚拟终端并关联到任何容器的标准输入上，例如运行一个一次性交互shell。</li>
+</ol>
+<h4 id="1-3-Docker主要应用场景"><a href="#1-3-Docker主要应用场景" class="headerlink" title="1.3. Docker主要应用场景"></a>1.3. Docker主要应用场景</h4><ul>
+<li>web应用的自动化打包和发布；</li>
+<li>自动化测试和持续集成、发布；</li>
+<li>在服务型环境中部署和调整数据库或其他的后台应用；</li>
+<li>从头编译或者扩展现有的OpenShift或Cloud Foundry平台来搭建自己的PaaS环境。</li>
+</ul>
+<h3 id="2-搭建Docker环境"><a href="#2-搭建Docker环境" class="headerlink" title="2. 搭建Docker环境"></a>2. 搭建Docker环境</h3><p>最新版本的Docker采用了年份+月份的版本发布规则，分为免费和商用两个版本（Docker-CE为免费版本&#x2F;Docker-EE为商用版本）。而且Docker-CE仅支持64bit的系统。<br>以下教程为在CentOS7的64bit系统中使用yum命令下载安装Docker。<br><strong>安装docker仓库</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo yum install -y yum-utils</span><br><span class="line">sudo yum-config-manager \</span><br><span class="line">    --add-repo \</span><br><span class="line">    https://download.docker.com/linux/centos/docker-ce.repo</span><br></pre></td></tr></table></figure>
+<p><strong>获取最新版本的Docker CE</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo yum -y install docker-ce</span><br></pre></td></tr></table></figure>
+<p><strong>启动Docker进程</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure>
+<p><strong>测试Docker</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+<p>运行hello-world后如果控制台输出如下语句则表示Docker已经安装成功。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Hello from Docker!</span><br><span class="line">This message shows that your installation appears to be working correctly.</span><br><span class="line"></span><br><span class="line">To generate this message, Docker took the following steps:</span><br><span class="line"> 1. The Docker client contacted the Docker daemon.</span><br><span class="line"> 2. The Docker daemon pulled the <span class="string">&quot;hello-world&quot;</span> image from the Docker Hub.</span><br><span class="line"> 3. The Docker daemon created a new container from that image <span class="built_in">which</span> runs the</span><br><span class="line">    executable that produces the output you are currently reading.</span><br><span class="line"> 4. The Docker daemon streamed that output to the Docker client, <span class="built_in">which</span> sent it</span><br><span class="line">    to your terminal.</span><br><span class="line"></span><br><span class="line">To try something more ambitious, you can run an Ubuntu container with:</span><br><span class="line"> $ docker run -it ubuntu bash</span><br><span class="line"></span><br><span class="line">Share images, automate workflows, and more with a free Docker ID:</span><br><span class="line"> https://cloud.docker.com/</span><br><span class="line"></span><br><span class="line">For more examples and ideas, visit:</span><br><span class="line"> https://docs.docker.com/engine/userguide/</span><br></pre></td></tr></table></figure>
+<h3 id="3-Docker简单命令"><a href="#3-Docker简单命令" class="headerlink" title="3. Docker简单命令"></a>3. Docker简单命令</h3><p><strong>查询Docker Hub中的镜像</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker search java</span><br><span class="line">NAME            DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED</span><br><span class="line">java            Java is a concurrent, class-based, and obj...   1368      [OK]</span><br><span class="line">ibmjava         Official IBM® SDK, Java™ Technology Editio...   27        [OK]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>下载Docker Hub中的镜像</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker pull hello-world</span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from library/hello-world</span><br><span class="line">78445dd45222: Already exists </span><br><span class="line">Digest: sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> hello-world:latest</span><br></pre></td></tr></table></figure>
+<p><strong>查看已下载的所有镜像</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">java                8                   d23bdf5b1b1b        4 months ago        643 MB</span><br><span class="line">hello-world         latest              48b5124b2768        4 months ago        1.84 kB</span><br></pre></td></tr></table></figure>
+<p><strong>运行一个新的容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -itd \</span><br><span class="line">	--name nginx_SSL \		<span class="comment">#容器名称</span></span><br><span class="line">	-p 8011:80 -p 4433:443 \	<span class="comment">#暴露端口 本机端口:容器端口</span></span><br><span class="line">	--<span class="built_in">link</span> blog_mini:blog_mini \	<span class="comment">#关联blog_mini容器</span></span><br><span class="line">	-v/data/nginx/config:/etc/nginx/conf.d \	<span class="comment">#挂载本机的目录到容器</span></span><br><span class="line">	-v /data/nginx/logs:/var/log/nginx \		<span class="comment">#挂载本机的目录到容器</span></span><br><span class="line">	nginx:1.13		<span class="comment">#镜像</span></span><br></pre></td></tr></table></figure>
+<p><strong>查看所有的容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID    IMAGE           COMMAND     CREATED            STATUS                      PORTS      NAMES</span><br><span class="line">8cae4be0d7cb    hello-world     <span class="string">&quot;/hello&quot;</span>    32 seconds ago     Exited (0) 31 seconds ago              dreamy_noether</span><br><span class="line">eccf37bf03b4    hello-world     <span class="string">&quot;/hello&quot;</span>    40 minutes ago     Exited (0) 40 minutes ago              youthful_franklin</span><br></pre></td></tr></table></figure>
+<p><strong>常用Docker命令</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker info			<span class="comment">#显示Docker和系统信息</span></span><br><span class="line">docker start hello-world	<span class="comment">#启动容器</span></span><br><span class="line">docker stop hello-world		<span class="comment">#停止容器</span></span><br><span class="line">docker <span class="built_in">exec</span> -it centos /bin/bash	<span class="comment">#执行centos容器的命令</span></span><br><span class="line">docker inspect centos		<span class="comment">#查看centos容器的信息</span></span><br><span class="line">docker <span class="built_in">cp</span> /root/xx.zip centos:/root	<span class="comment">#复制文件到容器</span></span><br><span class="line">docker <span class="built_in">rm</span> hello-world		<span class="comment">#删除hello-world容器</span></span><br><span class="line">docker rmi hello-world		<span class="comment">#删除hello-world镜像</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>容器技术</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker系列之二：构建CentOS7</title>
+    <url>/2017/docker-series-two-centos7/</url>
+    <content><![CDATA[<p>CentOS7的docker默认情况下是不能够执行systemctl命令的，抛出以下错误:<br><code>Failed to get D-Bus connection: Operation not permitted</code><br>从CentOS的官网上可以查询到解决该问题的办法，使用Dockerfile的方式来构建centos7的image。</p>
+<span id="more"></span>
+
+<h3 id="1-CentOS7的Dockerfile"><a href="#1-CentOS7的Dockerfile" class="headerlink" title="1. CentOS7的Dockerfile"></a>1. CentOS7的Dockerfile</h3><p>Dockerfile的具体内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># centos的版本</span></span><br><span class="line">FROM centos:7</span><br><span class="line">ENV container docker</span><br><span class="line"><span class="comment"># 在新建的images中使用systemctl命令</span></span><br><span class="line">RUN (<span class="built_in">cd</span> /lib/systemd/system/sysinit.target.wants/; <span class="keyword">for</span> i <span class="keyword">in</span> *; <span class="keyword">do</span> [ <span class="variable">$i</span> == \</span><br><span class="line">systemd-tmpfiles-setup.service ] || <span class="built_in">rm</span> -f <span class="variable">$i</span>; <span class="keyword">done</span>); \</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/multi-user.target.wants/*;\</span><br><span class="line"><span class="built_in">rm</span> -f /etc/systemd/system/*.wants/*;\</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/local-fs.target.wants/*; \</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/sockets.target.wants/*udev*; \</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/sockets.target.wants/*initctl*; \</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/basic.target.wants/*;\</span><br><span class="line"><span class="built_in">rm</span> -f /lib/systemd/system/anaconda.target.wants/*; \</span><br><span class="line"><span class="comment"># 安装ssh软件包（可选）</span></span><br><span class="line">yum -y install openssh-server; \</span><br><span class="line">yum -y install openssh-clients; \</span><br><span class="line"><span class="comment"># 安装net工具（可选）</span></span><br><span class="line">yum -y install net-tools; \</span><br><span class="line">yum clean all;</span><br><span class="line">VOLUME [ <span class="string">&quot;/sys/fs/cgroup&quot;</span> ]</span><br><span class="line">CMD [<span class="string">&quot;/usr/sbin/init&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>执行命令如下命令即可完成centos7的image的构建</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker build --<span class="built_in">rm</span> -t centos7:base .</span><br></pre></td></tr></table></figure>
+<h3 id="2-运行CentOS7的Container"><a href="#2-运行CentOS7的Container" class="headerlink" title="2. 运行CentOS7的Container"></a>2. 运行CentOS7的Container</h3><p>在构建完成之后，执行以下命令，即可运行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker run --name centos_test -v /sys/fs/cgroup:/sys/fs/cgroup:ro --privileged -itd centos7:base</span><br></pre></td></tr></table></figure>
+<p>进入centos_test容器内部</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker <span class="built_in">exec</span> -it <span class="built_in">test</span> bash</span><br></pre></td></tr></table></figure>
+<p>启动ssh，不再报错，构建成功。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ systemctl start sshd</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>容器技术</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+        <tag>CentOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>利用Github Pages搭建Hexo个人博客网站</title>
+    <url>/2017/hexo-one-installation/</url>
+    <content><![CDATA[<p>之前自己搭建过一个博客是基于的xpleaf的<a href="https://github.com/xpleaf/Blog_mini">Blog_mini</a>做了小优化的博客，那个博客是用Python+Flask做的，也蛮不错的，不过这个博客是需要购买云服务器的，得花money。最近突然想起来为何不弄一个免费的博客呢，这时Hexo进入我的视线，使用Hexo+Github Pages就可以免费搭建自己的个人博客网站。</p>
+<span id="more"></span>
+
+<h3 id="1-基础环境需要"><a href="#1-基础环境需要" class="headerlink" title="1. 基础环境需要"></a>1. 基础环境需要</h3><p>Hexo是使用node.js构建的，所以基础环境如下：</p>
+<ul>
+<li>Node.js</li>
+<li>hexo</li>
+<li>Git</li>
+</ul>
+<h3 id="2-安装Node-js和Git"><a href="#2-安装Node-js和Git" class="headerlink" title="2. 安装Node.js和Git"></a>2. 安装Node.js和Git</h3><p>我这使用的系统是Win，因此只要在官网上下载node.js和Git的安装包直接安装即可，很简单一切都是可视化的。</p>
+<ul>
+<li><a href="https://nodejs.org/en/">Node.js官网下载地址</a></li>
+<li><a href="https://git-scm.com/downloads">Git官网下载地址</a></li>
+</ul>
+<p>对于CentOS系统的可以直接使用yum进行安装。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 安装node.js</span></span><br><span class="line">yum install -y nodejs </span><br><span class="line"><span class="comment"># 安装git</span></span><br><span class="line">yum install -y git</span><br></pre></td></tr></table></figure>
+<p>安装成功后可以使用node -v 和npm -v来检测node.js是否安装成功，使用it –version验证Git的安装是否成功</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@VM_204_110_centos ~]<span class="comment"># node -v</span></span><br><span class="line">v6.11.3</span><br><span class="line">[root@VM_204_110_centos ~]<span class="comment"># npm -v</span></span><br><span class="line">3.10.10</span><br><span class="line">[root@VM_204_110_centos ~]<span class="comment"># git --version</span></span><br><span class="line">git version 1.8.3.1</span><br></pre></td></tr></table></figure>
+<h3 id="3-安装hexo"><a href="#3-安装hexo" class="headerlink" title="3. 安装hexo"></a>3. 安装hexo</h3><p>对于win系统，主要的操作都是使用git-bash，所以要打开git-bash程序，在里面执行相关的命令。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 切换到要安装hexo的目录</span></span><br><span class="line">$ <span class="built_in">cd</span> /d/Documents/hexo/notes/</span><br><span class="line"><span class="comment"># 安装hexo</span></span><br><span class="line">$ npm install hexo</span><br></pre></td></tr></table></figure>
+<p><em>注：由于git-bash中的命令和CentOS系统中是一样，以下不再对CentOS做单独的说明。</em></p>
+<p>接下来对hexo进行初始化</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 初始化hexo</span></span><br><span class="line">hexo init</span><br><span class="line"><span class="comment"># 安装hexo的相关依赖包</span></span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+<p>执行以上相关命令的时候需要联网下载，所以具体的话费时间需要看网络带宽了，执行成功后会生成如下目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@VM_204_110_centos hexo]<span class="comment"># ll notes/</span></span><br><span class="line">total 32</span><br><span class="line">-rw-r--r--   1 root root  1755 Sep 20 14:54 _config.yml</span><br><span class="line">drwxr-xr-x 287 root root 12288 Sep 20 15:05 node_modules</span><br><span class="line">-rw-r--r--   1 root root   443 Sep 20 14:54 package.json</span><br><span class="line">drwxr-xr-x   2 root root  4096 Sep 20 14:54 scaffolds</span><br><span class="line">drwxr-xr-x   3 root root  4096 Sep 20 14:54 <span class="built_in">source</span></span><br><span class="line">drwxr-xr-x   3 root root  4096 Sep 20 14:54 themes</span><br></pre></td></tr></table></figure>
+<h3 id="4-创建新博文-amp-本地验证Hexo"><a href="#4-创建新博文-amp-本地验证Hexo" class="headerlink" title="4. 创建新博文&amp;本地验证Hexo"></a>4. 创建新博文&amp;本地验证Hexo</h3><p>新建博文命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new <span class="string">&quot;hi hexo&quot;</span></span><br></pre></td></tr></table></figure>
+<p>这是会在source&#x2F;_posts路径下生成一个名称为hi-hexo.md的Markdown文件，直接编辑该文件。而后执行如下命令。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 清除以前生成的静态文件</span></span><br><span class="line">hexo clean</span><br><span class="line"><span class="comment"># 生成静态文件，可以简写为hexo g</span></span><br><span class="line">hexo generate</span><br><span class="line"><span class="comment"># 启动本地服务，可以简写为hexo s，默认端口是4000</span></span><br><span class="line">hexo server</span><br></pre></td></tr></table></figure>
+<p>这时在浏览器的地址栏输入<a href="http://localhost:4000/">http://localhost:4000</a>即可看到自己的新建的hexo网站。</p>
+<h3 id="5-将网站推送到Github上"><a href="#5-将网站推送到Github上" class="headerlink" title="5. 将网站推送到Github上"></a>5. 将网站推送到Github上</h3><p>既然要使用Github的Pages功能，Github的帐号是必须的了。</p>
+<ul>
+<li><a href="https://github.com/">Github网址</a></li>
+</ul>
+<h4 id="5-1-创建repository"><a href="#5-1-创建repository" class="headerlink" title="5.1. 创建repository"></a>5.1. 创建repository</h4><p>登录Github新建一个repository，注意名字必须要有一定的规则。比如你的用户名是<code>Hello</code>，那么这个repository的名字必须是<code>Hello.github.io</code>。</p>
+<h4 id="5-2-修改-config-yml配置文件"><a href="#5-2-修改-config-yml配置文件" class="headerlink" title="5.2. 修改_config.yml配置文件"></a>5.2. 修改_config.yml配置文件</h4><p>要把本地的静态网站推送到Github上必须要设置github的地址，在_config.yml中的Deployment位置修改。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  <span class="built_in">type</span>: git</span><br><span class="line">  repository: https://github.com/Hello/Hello.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<p><em>注：需要将Hello替换为自己实际的用户名</em></p>
+<h4 id="5-3-部署"><a href="#5-3-部署" class="headerlink" title="5.3. 部署"></a>5.3. 部署</h4><p>执行下列命令即可完成hexo的部署。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo generate</span><br><span class="line"><span class="comment"># 部署命令 可以简写为 hexo d</span></span><br><span class="line">hexo deploy</span><br></pre></td></tr></table></figure>
+<p>直接访问地址<a href="https://hello.github.io/">https://Hello.github.io</a>即可查看。</p>
+<h3 id="6-Hexo主题"><a href="#6-Hexo主题" class="headerlink" title="6. Hexo主题"></a>6. Hexo主题</h3><p>Hexo支持很多主题，可以在Hexo官网上查找。</p>
+<ul>
+<li><a href="https://hexo.io/themes/">Hexo官网的主题</a></li>
+</ul>
+<p>同时在推荐一下<a href="https://github.com/iissnan/hexo-theme-next">next主题</a>，具体的效果展示可以看作者的的博客<a href="http://notes.iissnan.com/">IIssNan’s Notes</a>。</p>
+]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>GithubPages</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JavaScript系列之一：创建对象</title>
+    <url>/2017/js-series-one-create-object/</url>
+    <content><![CDATA[<p>JavaScript创建对象常见的几种创建对象的方式。</p>
+<span id="more"></span>
+
+<h3 id="1-通过Object构造函数创建对象"><a href="#1-通过Object构造函数创建对象" class="headerlink" title="1. 通过Object构造函数创建对象"></a>1. 通过Object构造函数创建对象</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    var person=new Object();</span><br><span class="line">    person.nam=&quot;lxy&quot;;</span><br><span class="line">    person.age=&quot;22&quot;;</span><br><span class="line">    person.job=&quot;Software Engineer&quot;;</span><br><span class="line">    person.sayName= function () &#123;</span><br><span class="line">        alert(this.nam);</span><br><span class="line">    &#125;</span><br><span class="line">    person.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>优点：简单</p>
+<h3 id="2-通过字面量创建对象"><a href="#2-通过字面量创建对象" class="headerlink" title="2. 通过字面量创建对象"></a>2. 通过字面量创建对象</h3><p>早期JS开发人员经常使用new Object()创建对象，几年后对象字面量称为创建对象的首选模式。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    var person = &#123;</span><br><span class="line">        name:&quot;lxy&quot;,</span><br><span class="line">        age:22,</span><br><span class="line">        job:&quot;Software Engineer&quot;,</span><br><span class="line">        sayName:function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    person.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>要注意一点就是每声明一个键值对后面标点是“,”。</p>
+<p>这些属性在创建时都带有一些特征值（characteristic），JavaScript通过这些特征值来定义它们的行为。</p>
+<p>对象字面量相对于Object构造函数代码量少了一点点。但是这2种方法通过一个接口创建很多对象，会产生大量重复代码。Don’t Repeat Yourself！我们需要对重复的代码进行抽象。工厂模式就是在这种情况下出现的。</p>
+<h3 id="3-工厂模式"><a href="#3-工厂模式" class="headerlink" title="3. 工厂模式"></a>3. 工厂模式</h3><p>工厂模式是软件工程领域一种广为人知的设计模式，这种模式抽象了创建具体对象的过程。</p>
+<p>通过类来创建多个实例必然可以减少代码重复，但是ECMAScript中无法创建类，所以就用函数来封装以特定接口创建对象的细节。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function createPerson(name, age, job)&#123;</span><br><span class="line">        var o=new Object();</span><br><span class="line">        o.name=name;</span><br><span class="line">        o.age=age;</span><br><span class="line">        o.job=job;</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=createPerson(&quot;lxy&quot;, 22, &quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=createPerson(&quot;strangerA&quot;, 24, &quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>工厂模式减少了重复代码，但是不能够识别对象，所有实例都是object类型的。这时构造函数模式就出现了。</p>
+<h3 id="4-构造函数模式"><a href="#4-构造函数模式" class="headerlink" title="4. 构造函数模式"></a>4. 构造函数模式</h3><p>像Object和Array这样的原生构造函数，在运行时会自动出现在执行环境中。我们可以创建自定义构造函数，从而创建特定类型的对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function Person(name ,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=new Person(&quot;strangerA&quot;,24,&quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>构造函数中首字母大写，而非构造函数首字母小写作为区别。</p>
+<p>通过new操作符来创建Person实例，这样创建的实例都有一个constractor(构造函数)属性，该属性指向Person。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">alert(lxy.constructor==Person); //true</span><br><span class="line">alert(strangerA.constructor==Person); //true</span><br></pre></td></tr></table></figure>
+<p>lxy和strangeA是Person的实例，同时也是Object的实例。因为所有的对象都继承自Object。</p>
+<p>创建自定义构造函数意味着将来可以将它的实例标识为一种特定的类型；而这正是构造函数胜过工厂模式的地方。</p>
+<p>构造函数也是函数，所以语法上可以像普通函数一样去用，但是可以用并不代表应该用，还是以构造函数的方式用更合理。</p>
+<p>构造函数的问题是，同一构造函数的不同实例的相同方法是不一样的。</p>
+<p>alert(lxy.sayName&#x3D;&#x3D;strangerA.sayName());&#x2F;&#x2F;false</p>
+<p>这个问题很好理解，因为js中函数就是对象，每定义一个函数，也就是实例化了一个对象。</p>
+<p>从代码的角度可能理解的更深刻：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">this.sayName=function()&#123;alert(this.name)&#125;;与</span><br><span class="line">this.sayName=new Function(alert(this.name));是等价的。</span><br></pre></td></tr></table></figure>
+<p>所以使用构造函数创建对象，每个方法在每个实例上都要重新实现一遍，一是耗资源，二是创建两个或者多个完成同样任务的Function没有必要，三是有this在，没必要在代码执行前就把函数绑定到特定对象上。</p>
+<p>所以，有一种方法是说把函数定义转移到构造函数外部，代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function Person(name ,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.sayName=sayName;</span><br><span class="line">    &#125;</span><br><span class="line">    function sayName()&#123;</span><br><span class="line">        alert(this.name);</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=new Person(&quot;strangerA&quot;,24,&quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>把sayName()函数的定义转移到构造函数外部，成为全局的函数，构造函数内部把sayName赋为为全局的sayName。这样sayName是一个指向外部函数的指针，因此lxy和strangeA就共享了 全局的sayName函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">alert(lxy.sayName==strangerA.sayName);//true</span><br></pre></td></tr></table></figure>
+<p>但是这会有更糟糕的问题：全局作用域的函数只能被某个对象调用，这名不副实啊，会造成对全局环境的污染；更糟糕的是构造函数有多少个方法，就要定义多少个全局函数， 那构造函数就丝毫没有封装性可言了。</p>
+<p>但是这样的想法是可贵的，为原型模式做了铺垫，构造函数创建对象问题的解决办法是原型模式。</p>
+<h3 id="5-原型模式"><a href="#5-原型模式" class="headerlink" title="5. 原型模式"></a>5. 原型模式</h3><p>原型模式就是把构造函数中方法拿出来的基础上，为了避免对全局环境的污染，再做了一层封装，但是毕竟是一种新的模式，它封装的更彻底，而且也不是把所有的函数都封装，而是恰到好处的把构造函数中公共的方法和属性进行了封装。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person()&#123;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">    Person.prototype.name=&quot;lxy&quot;;</span><br><span class="line">    Person.prototype.age=22;</span><br><span class="line">    Person.prototype.job=&quot;Software Engineer&quot;;</span><br><span class="line">    Person.prototype.sayName=function()&#123;</span><br><span class="line">        alert(this.name);</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    var lxy=new Person();</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    var personA=new Person();</span><br><span class="line">    personA.sayName();</span><br><span class="line">    alert(lxy.sayName()==personA.sayName());//true</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用原型的好处是可以让所有的实例共享它所包含的属性和方法。完美的解决了构造函数的问题。因为原型是js中的一个核心内容，其信息量很大，所以另作介绍，有兴趣可看《javascript原型Prototype》。</p>
+<p>原型也有它本身的问题，共享的属性值如果是引用类型，一个实例对该属性的修改会影响到其他实例。这正是原型模式很少单独被使用的原因。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">function Person()&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">Person.prototype.name=&quot;lxy&quot;;</span><br><span class="line">Person.prototype.age=22;</span><br><span class="line">Person.prototype.job=&quot;Software Engineer&quot;;</span><br><span class="line">Person.prototype.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">Person.prototype.sayName=function()&#123;</span><br><span class="line">    alert(this.name);</span><br><span class="line">&#125;</span><br><span class="line">     </span><br><span class="line">     var lxy=new Person();</span><br><span class="line">     var personA=new Person();</span><br><span class="line">     alert(lxy.friends);//friend1,friend2</span><br><span class="line">     alert(personA.friends);//friend1,friend2</span><br><span class="line">     alert(lxy.friends==personA.friends);//true</span><br><span class="line">     lxy.friends.push(&quot;friend3&quot;);</span><br><span class="line">     alert(lxy.friends);//friend1,friend2,friend3</span><br><span class="line">     alert(personA.friends);//friend1,friend2,friend3</span><br><span class="line">     alert(lxy.friends==personA.friends);//true</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="6-构造函数和原型混合模式"><a href="#6-构造函数和原型混合模式" class="headerlink" title="6. 构造函数和原型混合模式"></a>6. 构造函数和原型混合模式</h3><p>创建自定义类型的最常见方式，就是组合使用构造函数模式和原型模式。构造函数模式用于定义实例属性，而原型模式用于定义共享的方法和属性。结果，每个实例都有一份实例属性的副本，同时又共享着对方法的引用，最大限度的节省了内存。另外，这种混合模式还支持向构造函数传递参数，可谓是集两种模式之长。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Person.prototype=&#123;</span><br><span class="line">        constructor : Person,</span><br><span class="line">        sayName : function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">     var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">     var personA=new Person(&quot;personA&quot;,25,&quot;Doctor&quot;);</span><br><span class="line">     alert(lxy.friends); //friend1,friend2</span><br><span class="line">     alert(personA.friends); //friend1,friend2</span><br><span class="line">     alert(lxy.friends==personA.friends); //false</span><br><span class="line">     lxy.friends.push(&quot;friend3&quot;);</span><br><span class="line">     alert(lxy.friends); //friend1,friend2,friend3</span><br><span class="line">     alert(personA.friends); //friend1,friend2</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>实例属性在构造函数中定义，而共享属性constructor和共享方法sayName()在原型中定义。而修改一个实例的friends不会影响其他实例的friends，因为它们引用不同数组，根本没关系。</p>
+<p>这种构造函数与原型混合模式，是目前使用最广泛、认同度最高的一种创建自定义类型的方法。可以说，这是用来定义引用类型的一种默认模式。其实原型就是为构造函数服务的，配合它来创建对象，想要只通过原型一劳永逸的创建对象是不可取的，因为它只管创建共享的属性和方法，剩下的就交给构造函数来完成。</p>
+<h3 id="7-动态原型模式"><a href="#7-动态原型模式" class="headerlink" title="7. 动态原型模式"></a>7. 动态原型模式</h3><p>个人觉得构造函数和原型混合模式已经可以完美的完成任务了。但是动态原型模式的提出是因为混合模式中用了构造函数对象居然还没创建成功，还需要再操作原型，这在其他OO语言开发人员看来很别扭。所以把所有信息都封装到构造函数中，即通过构造函数必要时初始化原型，在构造函数中同时使用了构造函数和原型，这就成了动态原型模式。真正用的时候要通过检查某个应该存在的方法是否有效，来决定是否需要初始化原型。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job) &#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">        if(typeof this.sayName != &quot;function&quot;) &#123;</span><br><span class="line">            alert(&quot;初始化原型&quot;);//只执行一次</span><br><span class="line">            Person.prototype.sayName=function()&#123;</span><br><span class="line">                alert(this.name);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    var personA=new Person(&quot;personA&quot;,25,&quot;Doctor&quot;);</span><br><span class="line">    personA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用动态原型时，不能使用对象字面量重写原型。如果在已经创建了实例的情况下重写原型，那么就会切断现有实例与新原型之间的联系。</p>
+<h3 id="8-寄生的构造函数模式"><a href="#8-寄生的构造函数模式" class="headerlink" title="8. 寄生的构造函数模式"></a>8. 寄生的构造函数模式</h3><p>在前面几种模式都不适用的情况下，适用寄生（parasitic）构造函数模式。寄生模式其实就是把工厂模式封装在构造函数模式里,即创建一个函数，该函数的作用仅仅是封装创建对象的代码，然后再返回新创建的对象，从表面看，这个函数又很像典型的构造函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        var o=new Object();</span><br><span class="line">        o.name=name;</span><br><span class="line">        o.age=age;</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>除了适用new操作符使得该函数成为构造函数外，这个模式和工厂模式一模一样。</p>
+<p>返回的对象和构造函数或者构造的原型属性之间没有任何关系，所以不能用instanceof，这种方式创建的对象和在构造函数外面创建的对象没什么两样。</p>
+<h3 id="9-稳妥的构造函数模式"><a href="#9-稳妥的构造函数模式" class="headerlink" title="9. 稳妥的构造函数模式"></a>9. 稳妥的构造函数模式</h3><p>稳妥的构造函数模式用显式声明的方法来访问属性。</p>
+<p>和这种模式相关的有一个概念：稳妥对象。稳妥对象，指没有公共对象，而且其方法也不引用this的对象。</p>
+<p>稳妥对象最适合在一些安全的环境中（这些环境中会禁用this和new），或者防止数据被其他应用程序（如Mashup）改动时使用。</p>
+<p>稳妥构造函数遵循与寄生构造函数类似的模式，但有两点不同：一是新创建对象的实例方法不引用this，而是不使用new操作符调用构造函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        //创建要返回的对象</span><br><span class="line">        var o=new Object();</span><br><span class="line">        //可以在这里定义私有变量和函数</span><br><span class="line">        </span><br><span class="line">        //添加方法</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    alert(lxy.name);//undefined</span><br><span class="line">    alert(lxy.age);//undefined</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>以这种模式创建的对象中，lxy是一个稳妥对象，除了使用sayName()方法外，没有其他方法访问name的值，age，job类似。</p>
+<p>即使有其他代码会给这个对象添加方法或数据成员，但也不可能有别的方法访问传入构造函数中的原始数据。</p>
+<p>与寄生构造函数模式类似，使用稳妥构造函数模式创建的对象与构造函数之间也没有什么关系，因此不能用instanceof操作符。</p>
+<p>各种创建方法问题总结：</p>
+<ol>
+<li>工厂模式：没法知道一对象的类型。</li>
+<li>构造函数：多个实例之间共享方法。</li>
+<li>原型：属性值是引用类型时，一个实例对该属性的修改会影响到其他实例。</li>
+<li>组合使用构造函数模式和原型模式：【推荐】构造函数模式用于定义实例属性，每个实例都有一份实例属性的副本；而原型模式用于定义共享的方法和属性，每个实例同时又共享着对方法的引用</li>
+</ol>
+]]></content>
+      <categories>
+        <category>前端技术</category>
+      </categories>
+      <tags>
+        <tag>JavaScript</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kubernetes系列之一：安装步骤</title>
+    <url>/2017/kubernetes-series-one-installation/</url>
+    <content><![CDATA[<p>Docker是一个很好的东西，特别是在和微服务相结合之后。但是在服务增多，同时需要增多服务节点时，过多的Docker容器的管理就变得很麻烦。Kubernetes就是一款Google发布的开源的容器集群管理软件，它非常利于对Docker容器集群做到自动化部署、管理，能弹性地调整容器的个数、扩展性能，自动维护容器。本文主要介绍Kubernetes的安装步骤以及部分常用插件的安装。</p>
+<span id="more"></span>
+
+<h3 id="1-Kubernetes安装"><a href="#1-Kubernetes安装" class="headerlink" title="1. Kubernetes安装"></a>1. Kubernetes安装</h3><p>以下是两个节点的部署示例，下表为各节点的IP信息。</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>主机名</th>
+<th>IP地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>master</td>
+<td>k8s-master</td>
+<td>192.168.12.210</td>
+</tr>
+<tr>
+<td>node1</td>
+<td>k8s-node1</td>
+<td>192.168.12.211</td>
+</tr>
+</tbody></table>
+<p><code>注意：需要所有节点都应该关闭防火墙</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemctl <span class="built_in">disable</span> firewalld <span class="comment">#禁止系统启动时服务自启动</span></span><br><span class="line">systemctl stop firewalld <span class="comment">#停止服务</span></span><br></pre></td></tr></table></figure>
+
+<p>系统&#x2F;软件版本</p>
+<table>
+<thead>
+<tr>
+<th>系统&#x2F;软件</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>centos</td>
+<td>7.3</td>
+</tr>
+<tr>
+<td>docker</td>
+<td>1.12.6</td>
+</tr>
+<tr>
+<td>kubernetes</td>
+<td>1.5.2</td>
+</tr>
+</tbody></table>
+<h4 id="1-1-master节点安装"><a href="#1-1-master节点安装" class="headerlink" title="1.1. master节点安装"></a>1.1. master节点安装</h4><h5 id="1-1-1-修改master的主机信息"><a href="#1-1-1-修改master的主机信息" class="headerlink" title="1.1.1. 修改master的主机信息"></a>1.1.1. 修改master的主机信息</h5><p>首先修改master节点的hostname为k8s-master</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hostnamectl set-hostname k8s-master</span><br></pre></td></tr></table></figure>
+<p>添加hosts文件的内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;k8s-master 192.168.12.210&quot;</span> &gt;&gt; /etc/hosts</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;k8s-node1 192.168.12.211&quot;</span> &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+<h5 id="1-1-2-安装kubernetes、etcd、flannel"><a href="#1-1-2-安装kubernetes、etcd、flannel" class="headerlink" title="1.1.2. 安装kubernetes、etcd、flannel"></a>1.1.2. 安装kubernetes、etcd、flannel</h5><p>使用yum来安装kurbernets</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install -y kubernetes etcd flannel</span><br></pre></td></tr></table></figure>
+<h5 id="1-1-3-修改kubernetes的配置文件"><a href="#1-1-3-修改kubernetes的配置文件" class="headerlink" title="1.1.3. 修改kubernetes的配置文件"></a>1.1.3. 修改kubernetes的配置文件</h5><p>查看&#x2F;etc&#x2F;kubernetes下的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ll /etc/kubernetes/</span><br><span class="line">total 24</span><br><span class="line">-rw-r--r--. 1 root root 1028 Sep  1 04:47 apiserver</span><br><span class="line">-rw-r--r--. 1 root root  656 Aug 30 03:27 config</span><br><span class="line">-rw-r--r--. 1 root root  189 Mar  6  2017 controller-manager</span><br><span class="line">-rw-r--r--. 1 root root  768 Aug 31 01:15 kubelet</span><br><span class="line">-rw-r--r--. 1 root root  103 Mar  6  2017 proxy</span><br><span class="line">-rw-r--r--. 1 root root  111 Mar  6  2017 scheduler</span><br></pre></td></tr></table></figure>
+<p>修改apiserver</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># The address on the local server to listen to.</span></span><br><span class="line">KUBE_API_ADDRESS=<span class="string">&quot;--insecure-bind-address=0.0.0.0&quot;</span></span><br><span class="line"><span class="comment"># Comma separated list of nodes in the etcd cluster</span></span><br><span class="line">KUBE_ETCD_SERVERS=<span class="string">&quot;--etcd-servers=http://127.0.0.1:2379&quot;</span></span><br><span class="line"><span class="comment"># Address range to use for services</span></span><br><span class="line">KUBE_SERVICE_ADDRESSES=<span class="string">&quot;--service-cluster-ip-range=10.254.0.0/16&quot;</span></span><br><span class="line"><span class="comment"># default admission control policies</span></span><br><span class="line"><span class="comment"># 去除了ServiceAccount--需要认证</span></span><br><span class="line">KUBE_ADMISSION_CONTROL=<span class="string">&quot;--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ResourceQuota&quot;</span></span><br><span class="line"><span class="comment"># Add your own!</span></span><br><span class="line">KUBE_API_ARGS=<span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+<p>修改config</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">KUBE_LOGTOSTDERR=<span class="string">&quot;--logtostderr=true&quot;</span></span><br><span class="line"><span class="comment"># journal message level, 0 is debug</span></span><br><span class="line">KUBE_LOG_LEVEL=<span class="string">&quot;--v=0&quot;</span></span><br><span class="line"><span class="comment"># Should this cluster be allowed to run privileged docker containers</span></span><br><span class="line">KUBE_ALLOW_PRIV=<span class="string">&quot;--allow-privileged=false&quot;</span></span><br><span class="line"><span class="comment"># How the controller-manager, scheduler, and proxy find the apiserver</span></span><br><span class="line">KUBE_MASTER=<span class="string">&quot;--master=http://k8s-master:8080&quot;</span></span><br></pre></td></tr></table></figure>
+<p>修改kubelet</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># The address for the info server to serve on (set to 0.0.0.0 or &quot;&quot; for all interfaces)</span></span><br><span class="line">KUBELET_ADDRESS=<span class="string">&quot;--address=0.0.0.0&quot;</span></span><br><span class="line"><span class="comment"># You may leave this blank to use the actual hostname</span></span><br><span class="line">KUBELET_HOSTNAME=<span class="string">&quot;--hostname-override=k8s-master&quot;</span></span><br><span class="line"><span class="comment"># location of the api-server</span></span><br><span class="line">KUBELET_API_SERVER=<span class="string">&quot;--api-servers=http://k8s-master:8080&quot;</span></span><br><span class="line"><span class="comment"># pod infrastructure container</span></span><br><span class="line"><span class="comment"># 这个地址是使用的私有的harbor地址（docker images的仓库）</span></span><br><span class="line">KUBELET_POD_INFRA_CONTAINER=<span class="string">&quot;--pod-infra-container-image=192.168.12.200/myproj/pause-amd64:3.0&quot;</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-1-4-配置etcd"><a href="#1-1-4-配置etcd" class="headerlink" title="1.1.4. 配置etcd"></a>1.1.4. 配置etcd</h5><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/etcd/etcd.conf</span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379&quot;</span></span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">&quot;http://0.0.0.0:2379&quot;</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-1-5-注册-amp-配置FLANNEL"><a href="#1-1-5-注册-amp-配置FLANNEL" class="headerlink" title="1.1.5. 注册&amp;配置FLANNEL"></a>1.1.5. 注册&amp;配置FLANNEL</h5><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">etcdctl <span class="built_in">mkdir</span> /kube-centos/network</span><br><span class="line">etcdctl mk /kube-centos/network/config <span class="string">&quot;&#123; \&quot;Network\&quot;: \&quot;172.30.0.0/16\&quot;, \&quot;SubnetLen\&quot;: 24, \&quot;Backend\&quot;: &#123; \&quot;Type\&quot;: \&quot;vxlan\&quot; &#125; &#125;&quot;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/sysconfig/flanneld</span><br><span class="line">FLANNEL_ETCD=<span class="string">&quot;http://k8s-master:2379&quot;</span></span><br><span class="line">FLANNEL_ETCD_KEY=<span class="string">&quot;/kube-centos/network&quot;</span></span><br><span class="line">FLANNEL_OPTIONS=<span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-1-6-重启服务"><a href="#1-1-6-重启服务" class="headerlink" title="1.1.6. 重启服务"></a>1.1.6. 重启服务</h5><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> SERVICES <span class="keyword">in</span> etcd kube-apiserver kube-controller-manager kube-scheduler flanneld; <span class="keyword">do</span></span><br><span class="line">	systemctl restart <span class="variable">$SERVICES</span></span><br><span class="line">	systemctl <span class="built_in">enable</span> <span class="variable">$SERVICES</span></span><br><span class="line">	systemctl status <span class="variable">$SERVICES</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<h4 id="1-2-node节点安装"><a href="#1-2-node节点安装" class="headerlink" title="1.2. node节点安装"></a>1.2. node节点安装</h4><h5 id="1-2-1-修改node1的主机信息"><a href="#1-2-1-修改node1的主机信息" class="headerlink" title="1.2.1. 修改node1的主机信息"></a>1.2.1. 修改node1的主机信息</h5><p>首先修改node1节点的hostname为k8s-node1</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hostnamectl set-hostname k8s-node1</span><br></pre></td></tr></table></figure>
+<p>添加hosts文件的内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;k8s-master 192.168.12.210</span></span><br><span class="line"><span class="string">k8s-node1 192.168.12.211&quot;</span> &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-2-安装kubernetes和flannel"><a href="#1-2-2-安装kubernetes和flannel" class="headerlink" title="1.2.2. 安装kubernetes和flannel"></a>1.2.2. 安装kubernetes和flannel</h5><p>使用yum来安装kurbernets</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install -y kubernetes-node flannel</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-3-修改kubernetes的配置文件"><a href="#1-2-3-修改kubernetes的配置文件" class="headerlink" title="1.2.3. 修改kubernetes的配置文件"></a>1.2.3. 修改kubernetes的配置文件</h5><p>查看&#x2F;etc&#x2F;kubernetes下的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ll /etc/kubernetes/</span><br><span class="line">total 12</span><br><span class="line">-rw-r--r--. 1 root root 655 Aug 30 03:41 config</span><br><span class="line">-rw-r--r--. 1 root root 769 Aug 30 22:59 kubelet</span><br><span class="line">-rw-r--r--. 1 root root 103 Mar  6  2017 proxy</span><br></pre></td></tr></table></figure>
+<p>修改config文件如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># logging to stderr means we get it in the systemd journal</span></span><br><span class="line">KUBE_LOGTOSTDERR=<span class="string">&quot;--logtostderr=true&quot;</span></span><br><span class="line"><span class="comment"># journal message level, 0 is debug</span></span><br><span class="line">KUBE_LOG_LEVEL=<span class="string">&quot;--v=0&quot;</span></span><br><span class="line"><span class="comment"># Should this cluster be allowed to run privileged docker containers</span></span><br><span class="line">KUBE_ALLOW_PRIV=<span class="string">&quot;--allow-privileged=true&quot;</span></span><br><span class="line"><span class="comment"># How the controller-manager, scheduler, and proxy find the apiserver</span></span><br><span class="line">KUBE_MASTER=<span class="string">&quot;--master=http://k8s-master:8080&quot;</span></span><br></pre></td></tr></table></figure>
+<p>修改kubelet文件如下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># The address for the info server to serve on (set to 0.0.0.0 or &quot;&quot; for all interfaces)</span></span><br><span class="line">KUBELET_ADDRESS=<span class="string">&quot;--address=0.0.0.0&quot;</span></span><br><span class="line"><span class="comment"># You may leave this blank to use the actual hostname</span></span><br><span class="line">KUBELET_HOSTNAME=<span class="string">&quot;--hostname-override=k8s-slave1&quot;</span></span><br><span class="line"><span class="comment"># location of the api-server</span></span><br><span class="line">KUBELET_API_SERVER=<span class="string">&quot;--api-servers=http://k8s-master:8080&quot;</span></span><br><span class="line"><span class="comment"># pod infrastructure container</span></span><br><span class="line"><span class="comment"># 这个地址是使用的私有的harbor地址（docker images的仓库）</span></span><br><span class="line">KUBELET_POD_INFRA_CONTAINER=<span class="string">&quot;--pod-infra-container-image=192.168.12.200/myproj/pause-amd64:3.0&quot;</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-2-4-修改flannel的配置文件"><a href="#1-2-4-修改flannel的配置文件" class="headerlink" title="1.2.4. 修改flannel的配置文件"></a>1.2.4. 修改flannel的配置文件</h5><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/sysconfig/flanneld</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># etcd url location.  Point this to the server where etcd runs</span></span><br><span class="line">FLANNEL_ETCD_ENDPOINTS=<span class="string">&quot;http://k8s-master:2379&quot;</span></span><br><span class="line"><span class="comment"># etcd config key.  This is the configuration key that flannel queries</span></span><br><span class="line"><span class="comment"># For address range assignment</span></span><br><span class="line"><span class="comment"># 必须与master节点配置flannel时的路径一致</span></span><br><span class="line">FLANNEL_ETCD_PREFIX=<span class="string">&quot;/kube-centos/network&quot;</span></span><br><span class="line"><span class="comment"># Any additional options that you want to pass</span></span><br><span class="line"><span class="comment">#FLANNEL_OPTIONS=&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+<h5 id="1-2-5-重启服务"><a href="#1-2-5-重启服务" class="headerlink" title="1.2.5. 重启服务"></a>1.2.5. 重启服务</h5><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> SERVICES <span class="keyword">in</span> kube-proxy kubelet flanneld docker; <span class="keyword">do</span></span><br><span class="line">	systemctl restart <span class="variable">$SERVICES</span></span><br><span class="line">	systemctl <span class="built_in">enable</span> <span class="variable">$SERVICES</span></span><br><span class="line">	systemctl status <span class="variable">$SERVICES</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p>此时在master节点执行如下命令，验证是否能够查到该节点</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl get nodes</span><br><span class="line">NAME        STATUS    AGE</span><br><span class="line">k8s-node1   Ready     6d</span><br></pre></td></tr></table></figure>
+<h3 id="2-skydns安装"><a href="#2-skydns安装" class="headerlink" title="2. skydns安装"></a>2. skydns安装</h3><p>Kubernetes的DNS插件</p>
+<ol>
+<li>先下载好四个组件包<br><code>harbor.xxx.com/kube/kubedns-amd64:1.9</code><br><code>harbor.xxx.com/kube/kube-dnsmasq-amd64:1.4</code><br><code>harbor.xxx.com/kube/dnsmasq-metrics-amd64:1.0</code><br><code>harbor.xxx.com/kube/exechealthz-amd64:1.2</code></li>
+<li>修改skydns-rc.yaml中对应的images地址</li>
+<li>安装资源<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl create -f skydns-rc.yaml</span><br><span class="line">kubectl create -f skydns-svc.yaml</span><br></pre></td></tr></table></figure></li>
+<li>在所有节点的&#x2F;etc&#x2F;kubernetes&#x2F;kubelet最后一行修改为：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">KUBELET_ARGS=<span class="string">&quot;--cluster-dns=10.254.0.100 --cluster-domain=cluster.local&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="3-dashboard安装"><a href="#3-dashboard安装" class="headerlink" title="3. dashboard安装"></a>3. dashboard安装</h3><p>Kubernetes的WebUI</p>
+<ol>
+<li>创建、下载dashboard的镜像<br><code>harbor.xxx.com/kube/k8s‐dashboard:1.6.0</code></li>
+<li>使用kubenetes安装文件中的yaml文件来创建资源，修改如下字段<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">image: harbor.xxx.com/kube/k8s-dashboard:1.6.0</span><br><span class="line">imagePullPolicy: IfNotPresent</span><br><span class="line"> - --apiserver-host=http://192.168.12.210:8080</span><br></pre></td></tr></table></figure></li>
+<li>安装资源<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl create -f kubernetes-dashboard.yaml</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="4-heapster安装"><a href="#4-heapster安装" class="headerlink" title="4. heapster安装"></a>4. heapster安装</h3><p>Kubernetes的性能监控插件</p>
+<ol>
+<li>下载组件包：<br><code>harbor.xxx.com/kube/heapster:canary</code><br><code>harbor.xxx.com/kube/heapster_influxdb:v0.5</code><br><code>harbor.xxx.com/kube/heapster_grafana:v2.6.0-2</code></li>
+<li>修改heapster的配置文件，文件位置解压heapster-1.2.0.tar.gz文件<br><code>heapster-1.2.0/deploy/kube-config/influxdb/</code></li>
+<li>修改heapster-controller.yaml文件中对应images，然后修改最后两句为<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">- --<span class="built_in">source</span>=kubernetes:http://192.168.12.210:8080?inClusterConfig=<span class="literal">false</span></span><br><span class="line">- --sink=influxdb:http://monitoring-influxdb:8086</span><br></pre></td></tr></table></figure></li>
+<li>修改influxdb-grafana-controller.yaml文件中的对应images地址。</li>
+<li>安装资源<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># (在heapster-1.2.0/deploy/kube-config/influxdb/目录中执行)</span></span><br><span class="line">kubectl create -f .</span><br></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+      <categories>
+        <category>容器技术</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+        <tag>Kubernetes</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Centos系列之四：压缩VMware的centos7虚机在宿主机上的磁盘空间</title>
+    <url>/2018/centos-series-four-disk-shrink/</url>
+    <content><![CDATA[<p>随着VMware虚拟机的使用，centos在宿主机上的磁盘占用也会越来越大，有时候即使删掉了centos的多余文件也不会感觉到磁盘占用在减少</p>
+<span id="more"></span>
+
+<h3 id="1-使用shrink命令压缩磁盘空间"><a href="#1-使用shrink命令压缩磁盘空间" class="headerlink" title="1. 使用shrink命令压缩磁盘空间"></a>1. 使用shrink命令压缩磁盘空间</h3><p>在VMware上的虚拟机系统要想压缩实际的磁盘空间的占用，前提是必须安装了VMwareTools或者open-vm-tools</p>
+<p>下面以centos7的open-vm-tools为例</p>
+<p>使用 <em>df</em> 命令可以查看虚机目前的磁盘占用，实际上要小于宿主机的磁盘占用空间。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># df -h</span></span><br></pre></td></tr></table></figure>
+<p>使用<strong>shrink</strong>来压缩磁盘空间</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# vmware-toolbox-cmd disk shrink /</span><br><span class="line">Please disregard any warnings about disk space for the duration of shrink process.</span><br><span class="line">Progress: 100 [===========&gt;]</span><br></pre></td></tr></table></figure>
+<p>在下面的进度条到了100的时候，这时的宿主机的VMware软件也会弹出一个含有进度条的提示框，<strong>提示“正在压缩磁盘XXX.vmdk”</strong>，当这个进度条走完后，压缩就成功了，之后就可以查看下虚机文件夹的磁盘空间大小。</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>CentOS</tag>
+        <tag>VMware</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Centos系列之一：Centos7安装VMwareTools</title>
+    <url>/2018/centos-series-one-vmwaretools/</url>
+    <content><![CDATA[<p>在WMware上的Centos7虚拟机要与主机共享文件夹需要安装VMwareTools（通过命令行模式）。</p>
+<span id="more"></span>
+
+<h3 id="1-加载VMwareTools的镜像"><a href="#1-加载VMwareTools的镜像" class="headerlink" title="1. 加载VMwareTools的镜像"></a>1. 加载VMwareTools的镜像</h3><p>首先启动CentOS 7,在VMware中点击上方“VM”，点击“Install VMware Tools…”（如已安装则显示“Reinstall VMware Tools…”）</p>
+<p><em>也可以直接使用虚拟机的光驱来手动加载VMware安装目录下的linux.iso镜像</em></p>
+<h3 id="2-在系统中挂载cdrom"><a href="#2-在系统中挂载cdrom" class="headerlink" title="2. 在系统中挂载cdrom"></a>2. 在系统中挂载cdrom</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 创建一个用于挂载镜像的目录</span></span><br><span class="line"><span class="built_in">mkdir</span> /mnt/cdrom</span><br><span class="line"><span class="comment"># 使用mount命令来加载镜像到/mnt/cdrom目录下</span></span><br><span class="line">mount /dev/cdrom /mnt/cdrom</span><br></pre></td></tr></table></figure>
+<p>使用ll命令来查看镜像的内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ll /mnt/cdrom/</span></span><br><span class="line">total 56377</span><br><span class="line">-r-xr-xr-x. 1 root root     1975 Mar 17  2017 manifest.txt</span><br><span class="line">-r-xr-xr-x. 1 root root     2287 Mar 17  2017 run_upgrader.sh</span><br><span class="line">-r--r--r--. 1 root root 56072885 Mar 17  2017 VMwareTools-10.1.6-5214329.tar.gz</span><br><span class="line">-r-xr-xr-x. 1 root root   802620 Mar 17  2017 vmware-tools-upgrader-32</span><br><span class="line">-r-xr-xr-x. 1 root root   848816 Mar 17  2017 vmware-tools-upgrader-64</span><br></pre></td></tr></table></figure>
+<h3 id="3-解压WMwareTools-tar-gz"><a href="#3-解压WMwareTools-tar-gz" class="headerlink" title="3. 解压WMwareTools.tar.gz"></a>3. 解压WMwareTools.tar.gz</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 复制压缩包到home</span></span><br><span class="line"><span class="built_in">cp</span> /mnt/cdrom/VMwareTools-10.1.6-5214329.tar.gz ~</span><br><span class="line"><span class="comment"># 卸载镜像</span></span><br><span class="line">umount /mnt/cdrom</span><br><span class="line"><span class="comment"># 解压VMwareTools到当前路径下</span></span><br><span class="line">tar -zxcf ~/VMwareTools-10.1.6-5214329.tar.gz</span><br></pre></td></tr></table></figure>
+<p>解压完成后会在当前路径下生成一个vmware-tools-distrib的目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># ll</span></span><br><span class="line">total 2764868</span><br><span class="line">-rw-------. 1 root root       1238 May 10  2017 anaconda-ks.cfg</span><br><span class="line">drwxr-xr-x. 3 root root        141 Oct 12  2017 CI</span><br><span class="line">drwxr-xr-x. 4 root root         45 Nov 30 13:30 docker</span><br><span class="line">-rw-r--r--. 1 root root 2457254895 May  3 16:32 harbor_db.tar.gz</span><br><span class="line">-rw-r--r--. 1 root root  317888971 Aug 29  2017 harbor-offline-installer-0.5.0.tgz</span><br><span class="line">-r--r--r--. 1 root root   56072885 May  4 08:54 VMwareTools-10.1.6-5214329.tar.gz</span><br><span class="line">drwxr-xr-x. 9 root root        145 Mar 17  2017 vmware-tools-distrib</span><br></pre></td></tr></table></figure>
+<h3 id="4-安装Cenos7编译环境"><a href="#4-安装Cenos7编译环境" class="headerlink" title="4. 安装Cenos7编译环境"></a>4. 安装Cenos7编译环境</h3><p>输入“cd vmware-tools-distrib&#x2F;”进入名为“vmware-tools-distrib”的目录，输入“.&#x2F;vmware-install.pl”尝试安装，出现错误“-bash: .&#x2F;vmware-install.pl: &#x2F;usr&#x2F;bin&#x2F;per: bad interpreter: No such file or directory”，表明未安装编译环境。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 使用yum来安装编译环境</span></span><br><span class="line">yum -y install perl gcc make kernel-headers kernel-devel</span><br></pre></td></tr></table></figure>
+<p>完成后使用yum命令来查看kernel(内核)的版本，需要保持一致</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum list kernel*</span></span><br><span class="line">Loaded plugins: fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line"> * base: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * epel: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * extras: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line"> * updates: mirrors.tuna.tsinghua.edu.cn</span><br><span class="line">Installed Packages</span><br><span class="line">kernel.x86_64                                                      3.10.0-514.el7                                          @anaconda</span><br><span class="line">kernel.x86_64                                                      3.10.0-514.16.1.el7                                     @updates</span><br><span class="line">kernel.x86_64                                                      3.10.0-693.21.1.el7                                     @updates</span><br><span class="line">kernel-devel.x86_64                                                3.10.0-693.21.1.el7                                     @updates</span><br><span class="line">kernel-headers.x86_64                                              3.10.0-693.21.1.el7                                     @updates</span><br><span class="line">kernel-tools.x86_64                                                3.10.0-693.21.1.el7                                     @updates</span><br><span class="line">kernel-tools-libs.x86_64                                           3.10.0-693.21.1.el7                                     @updates</span><br><span class="line">Available Packages</span><br><span class="line">kernel-abi-whitelists.noarch                                       3.10.0-693.21.1.el7                                     updates</span><br><span class="line">kernel-debug.x86_64                                                3.10.0-693.21.1.el7                                     updates</span><br><span class="line">kernel-debug-devel.x86_64                                          3.10.0-693.21.1.el7                                     updates</span><br><span class="line">kernel-doc.noarch                                                  3.10.0-693.21.1.el7                                     updates</span><br><span class="line">kernel-tools-libs-devel.x86_64                                     3.10.0-693.21.1.el7                                     updates</span><br></pre></td></tr></table></figure>
+<p>如果内核不一致需要将内核升级到和kernel-headers、kernel-devel一致的版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看当前系统的内核</span></span><br><span class="line">[root@localhost ~]<span class="comment"># uname -a</span></span><br><span class="line">Linux localhost 3.10.0-693.21.1.el7.x86_64 <span class="comment">#1 SMP Wed Mar 7 19:03:37 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux</span></span><br></pre></td></tr></table></figure>
+<h3 id="5-安装WMwareTools"><a href="#5-安装WMwareTools" class="headerlink" title="5. 安装WMwareTools"></a>5. 安装WMwareTools</h3><p>进入vmware-tools-distrib目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cd vmware-tools-distrib/</span></span><br><span class="line">[root@localhost vmware-tools-distrib]<span class="comment"># ll</span></span><br><span class="line">total 368</span><br><span class="line">drwxr-xr-x.  2 root root     87 Mar 17  2017 bin</span><br><span class="line">drwxr-xr-x.  5 root root     39 Mar 17  2017 caf</span><br><span class="line">drwxr-xr-x.  2 root root     67 Mar 17  2017 doc</span><br><span class="line">drwxr-xr-x.  5 root root   4096 Mar 17  2017 etc</span><br><span class="line">-rw-r--r--.  1 root root 149442 Mar 17  2017 FILES</span><br><span class="line">-rw-r--r--.  1 root root   2538 Mar 17  2017 INSTALL</span><br><span class="line">drwxr-xr-x.  2 root root    137 Mar 17  2017 installer</span><br><span class="line">drwxr-xr-x. 15 root root    202 Mar 17  2017 lib</span><br><span class="line">drwxr-xr-x.  3 root root     21 Mar 17  2017 vgauth</span><br><span class="line">-rwxr-xr-x.  1 root root 216748 Mar 17  2017 vmware-install.pl</span><br></pre></td></tr></table></figure>
+<p>执行安装命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./vmware-install.pl</span><br></pre></td></tr></table></figure>
+<p>安装过程中的人机交互可以直接全部回车</p>
+<h3 id="6-安装完成后的提示"><a href="#6-安装完成后的提示" class="headerlink" title="6. 安装完成后的提示"></a>6. 安装完成后的提示</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">The configuration of VMware Tools 10.1.6 build-5214329 <span class="keyword">for</span> Linux <span class="keyword">for</span> this</span><br><span class="line">running kernel completed successfully.</span><br><span class="line"></span><br><span class="line">You must restart your X session before any mouse or graphics changes take</span><br><span class="line">effect.</span><br><span class="line"></span><br><span class="line">You can now run VMware Tools by invoking <span class="string">&quot;/usr/bin/vmware-toolbox-cmd&quot;</span> from the</span><br><span class="line"><span class="built_in">command</span> line.</span><br><span class="line"></span><br><span class="line">To <span class="built_in">enable</span> advanced X features (e.g., guest resolution fit, drag and drop, and</span><br><span class="line">file and text copy/paste), you will need to <span class="keyword">do</span> one (or more) of the following:</span><br><span class="line">1. Manually start /usr/bin/vmware-user</span><br><span class="line">2. Log out and <span class="built_in">log</span> back into your desktop session</span><br><span class="line">3. Restart your X session.</span><br><span class="line"></span><br><span class="line">Enjoy,</span><br><span class="line"></span><br><span class="line">--the VMware team</span><br></pre></td></tr></table></figure>
+<h3 id="7-设置共享文件夹并挂载"><a href="#7-设置共享文件夹并挂载" class="headerlink" title="7. 设置共享文件夹并挂载"></a>7. 设置共享文件夹并挂载</h3><p>在VMware软件的虚拟机设置来添加需要与虚拟机共享的主机文件夹。（VM -&gt; Settings -&gt; Options -&gt; Shared folders）</p>
+<p>在centos虚拟机上执行以下命令来挂载共享文件夹到&#x2F;mnt&#x2F;hgfs目录下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 使用mount命令进行挂载</span></span><br><span class="line">[root@localhost ~]<span class="comment"># mount -t vmhgfs .host:/ /mnt/hgfs</span></span><br><span class="line"><span class="comment"># data1即为共享文件夹</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ll /mnt/hgfs/</span></span><br><span class="line">total 0</span><br><span class="line">drwxrwxrwx. 1 root root 0 Nov 26 21:57 data</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>CentOS</tag>
+        <tag>VMware</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Centos系列之三：Centos7安装open-vm-tools和设置共享文件夹</title>
+    <url>/2018/centos-series-three-open-vm-tools/</url>
+    <content><![CDATA[<p>最近在给VMware的CentOS7的虚拟机安装VMwareTools的时候，发现有一个提示说是现在open-vm-tools已经替代了VMwareTools。</p>
+<span id="more"></span>
+
+<h3 id="1-什么是open-vm-tools"><a href="#1-什么是open-vm-tools" class="headerlink" title="1. 什么是open-vm-tools"></a>1. 什么是open-vm-tools</h3><p>open-vm-tools 是 VMware Tools 的开源实施，由一套虚拟化实用程序组成，这些程序可增强虚拟机在 VMware 环境中的功能，使管理更加有效。open-vm-tools 的主要目的是使操作系统供应商及&#x2F;或社区以及虚拟设备供应商将 VMware Tools 绑定到其产品发布中。</p>
+<p>系统版本要求</p>
+<ul>
+<li>Red Hat Enterprise Linux 7.0及以上</li>
+<li>SUSE Linux Enterprise 12及以上</li>
+<li>Ubuntu 14.04及以上</li>
+<li>CentOS 7 and及以上</li>
+<li>Debian 7.x及以上</li>
+<li>Oracle Linux 7及以上</li>
+<li>Fedora 19及以上</li>
+<li>openSUSE 11.x及以上</li>
+</ul>
+<blockquote>
+<p>源码地址<a href="https://github.com/vmware/open-vm-tools">：vmware&#x2F;open-vm-tools</a></p>
+</blockquote>
+<h3 id="2-安装open-vm-tools"><a href="#2-安装open-vm-tools" class="headerlink" title="2. 安装open-vm-tools"></a>2. 安装open-vm-tools</h3><p>centos安装比较简单直接使用yum安装即可</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">yum install open-vm-tools</span><br></pre></td></tr></table></figure>
+<p>验证是否安装成功，输入命令vmware-直接按tab键，如果自动出现下面的这些命令就表示已经安装成功了</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vmware-checkvm             vmware-hgfsclient          vmware-rpctool             vmware-vgauth-cmd          </span><br><span class="line">vmware-guestproxycerttool  vmware-namespace-cmd       vmware-toolbox-cmd         vmware-xferlogs            </span><br></pre></td></tr></table></figure>
+<h3 id="3-共享宿主机的文件夹"><a href="#3-共享宿主机的文件夹" class="headerlink" title="3. 共享宿主机的文件夹"></a>3. 共享宿主机的文件夹</h3><p>在VMware软件的虚拟机设置来添加需要与虚拟机共享的主机文件夹。（VM -&gt; Settings -&gt; Options -&gt; Shared folders）</p>
+<p>修改&#x2F;etc&#x2F;fuse.conf（解决挂载目录的权限问题）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/fuse.conf</span><br></pre></td></tr></table></figure>
+<p>将user_allow_other取消注释（删除最前面的#）<br>修改&#x2F;etc&#x2F;fuse.conf</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># mount_max = 1000</span></span><br><span class="line">user_allow_other</span><br></pre></td></tr></table></figure>
+
+<p>在centos虚拟机上执行以下命令来挂载共享文件夹到&#x2F;mnt&#x2F;hgfs目录下</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 挂载所有的共享文件夹</span></span><br><span class="line">vmhgfs-fuse -o allow_other .host:/ /mnt/hgfs</span><br><span class="line"><span class="comment"># 只挂载/foo/bar文件夹</span></span><br><span class="line">vmhgfs-fuse -o allow_other .host:/foo/bar /mnt/hgfs</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>-o allow_other解决目录挂载之后权限的问题，允许其他用户使用</p>
+</blockquote>
+<p>验证是否成功</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ll /mnt/hgfs/</span><br><span class="line">total 0</span><br><span class="line">drwxrwxrwx. 1 root root 0 Aug 16 16:41 data</span><br></pre></td></tr></table></figure>
+<p>data文件夹就是之前设置的要共享的宿主机的文件夹</p>
+<p>但是上面的操作只是临时的，重新启动系统后，共享文件夹就会失效，想要永久生效还需要进行其他的配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 修改配置</span></span><br><span class="line">vi /etc/rc.local</span><br></pre></td></tr></table></figure>
+<p>在文件的下面新增以下内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># mount shared floder</span></span><br><span class="line">vmhgfs-fuse -o allow_other .host:/ /mnt/hgfs</span><br></pre></td></tr></table></figure>
+<p>&#x2F;etc&#x2F;rc.local其实是&#x2F;etc&#x2F;rc.d&#x2F;rc.local的一个软连接，需要保证&#x2F;etc&#x2F;rc.d&#x2F;rc.local具有可执行权限</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 新增执行权限</span></span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/rc.local</span><br></pre></td></tr></table></figure>
+<p>至此open-vm-tools的安装和共享文件夹的设置已经全部完成，可以放心大胆地使用了</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>CentOS</tag>
+        <tag>VMware</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Centos系列之二：Centos7升级内核</title>
+    <url>/2018/centos-series-two-update-kernel/</url>
+    <content><![CDATA[<p>centos7最简单的升级内核方法</p>
+<span id="more"></span>
+
+<h3 id="1-检查已安装的内核版本"><a href="#1-检查已安装的内核版本" class="headerlink" title="1. 检查已安装的内核版本"></a>1. 检查已安装的内核版本</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 使用uname命令查询当前的内核</span></span><br><span class="line">[root@localhost ~]<span class="comment"># uname -sr</span></span><br><span class="line">Linux 3.10.0-693.21.1.el7.x86_64</span><br></pre></td></tr></table></figure>
+<h3 id="2-在-CentOS-7-中升级内核"><a href="#2-在-CentOS-7-中升级内核" class="headerlink" title="2. 在 CentOS 7 中升级内核"></a>2. 在 CentOS 7 中升级内核</h3><p>使用最简单的yum命令来升级内核</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># yum升级kernel</span></span><br><span class="line">[root@localhost ~]<span class="comment"># yum update kernel</span></span><br></pre></td></tr></table></figure>
+<p>升级完成后重启系统，来使用新的内核</p>
+<h3 id="3-设置-GRUB-默认的内核版本（可选）"><a href="#3-设置-GRUB-默认的内核版本（可选）" class="headerlink" title="3. 设置 GRUB 默认的内核版本（可选）"></a>3. 设置 GRUB 默认的内核版本（可选）</h3><p>为了让新安装的内核成为默认启动选项，需要如下修改 GRUB 配置：</p>
+<p>打开并编辑<code>/etc/default/grub</code>并设置 <code>GRUB_DEFAULT=0</code>。意思是 GRUB 初始化页面的第一个内核将作为默认内核。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">GRUB_TIMEOUT=5</span><br><span class="line">GRUB_DEFAULT=0</span><br><span class="line">GRUB_DISABLE_SUBMENU=<span class="literal">true</span></span><br><span class="line">GRUB_TERMINAL_OUTPUT=<span class="string">&quot;console&quot;</span></span><br><span class="line">GRUB_CMDLINE_LINUX=<span class="string">&quot;rd.lvm.lv=centos/root rd.lvm.lv=centos/swap crashkernel=auto rhgb quiet&quot;</span></span><br><span class="line">GRUB_DISABLE_RECOVERY=<span class="string">&quot;true&quot;</span></span><br></pre></td></tr></table></figure>
+<p>接下来运行下面的命令来重新创建内核配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># grub2-mkconfig -o /boot/grub2/grub.cfg</span></span><br></pre></td></tr></table></figure>
+<p>重启并验证最新的内核已作为默认内核</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>CentOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>GitHub设置网络代理</title>
+    <url>/2020/12_github_set_proxy/</url>
+    <content><![CDATA[<p>家里的网络有时候连接GitHub仓库很慢，可以通过设置GitHub的网络代理来解决</p>
+<span id="more"></span>
+
+<h3 id="1-查看Git的代理设置"><a href="#1-查看Git的代理设置" class="headerlink" title="1. 查看Git的代理设置"></a>1. 查看Git的代理设置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git config --global -l</span><br></pre></td></tr></table></figure>
+<p>其中的http.proxy和https.proxy项即为Git的代理地址，如果这两项都没有则目前的git还没有设置代理</p>
+<h3 id="2-设置代理"><a href="#2-设置代理" class="headerlink" title="2. 设置代理"></a>2. 设置代理</h3><h4 id="2-1-HTTP代理"><a href="#2-1-HTTP代理" class="headerlink" title="2.1. HTTP代理"></a>2.1. HTTP代理</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git config --global http.proxy http://127.0.0.1:808</span><br><span class="line">git config --global https.proxy http://127.0.0.1:808</span><br></pre></td></tr></table></figure>
+<h4 id="2-2-SOCKS5代理"><a href="#2-2-SOCKS5代理" class="headerlink" title="2.2. SOCKS5代理"></a>2.2. SOCKS5代理</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git config --global http.proxy <span class="string">&#x27;socks5://127.0.0.1:1080&#x27;</span></span><br><span class="line">git config --global https.proxy <span class="string">&#x27;socks5://127.0.0.1:1080&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-取消代理"><a href="#3-取消代理" class="headerlink" title="3. 取消代理"></a>3. 取消代理</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git config --global --<span class="built_in">unset</span> http.proxy</span><br><span class="line">git config --global --<span class="built_in">unset</span> https.proxy</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>开发工具</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+        <tag>GitHub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VS2013在调试win32程序时附加显示Console窗口</title>
+    <url>/2020/13_vs2013_win32_console/</url>
+    <content><![CDATA[<p>使用VS2013在调试win32程序，不能显示Console窗口，部分调试信息无法显示，非常不便，可以通过vs的设置显示console窗口</p>
+<span id="more"></span>
+
+<h3 id="1-VS2013设置"><a href="#1-VS2013设置" class="headerlink" title="1. VS2013设置"></a>1. VS2013设置</h3><ol>
+<li>vs中打开解决方案。</li>
+<li>鼠标移动到项目名称上，点击鼠标右键，再点击属性，此刻会此项目的属性页。</li>
+<li>在配置属性-&gt;生成事件-&gt;后期生成事件中添加以下内容<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">editbin /SUBSYSTEM:CONSOLE $(OUTDIR)\$(ProjectName).exe</span><br></pre></td></tr></table></figure></li>
+<li>运行程序时多弹出一个黑色命令行的提示框，用来输出调试信息</li>
+</ol>
+]]></content>
+      <categories>
+        <category>开发工具</category>
+      </categories>
+      <tags>
+        <tag>VS2013</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>修改docker的默认存储路径</title>
+    <url>/2020/14_docker_modify_default_path/</url>
+    <content><![CDATA[<p>Docker默认安装的情况下，会以&#x2F;var&#x2F;lib&#x2F;docker&#x2F; 作为默认存储目录，存放拉取的镜像和创建的容器等。以下说明如何修改Docker 的存储目录，以centos7为例</p>
+<span id="more"></span>
+
+<h3 id="1-查看docker的默认存储路径"><a href="#1-查看docker的默认存储路径" class="headerlink" title="1. 查看docker的默认存储路径"></a>1. 查看docker的默认存储路径</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看docker的一些配置信息</span></span><br><span class="line">docker info</span><br></pre></td></tr></table></figure>
+
+<p>控制台输出信息（部分）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Kernel Version: 3.10.0-862.el7.x86_64</span><br><span class="line">Operating System: CentOS Linux 7 (Core)</span><br><span class="line">OSType: linux</span><br><span class="line">Architecture: x86_64</span><br><span class="line">CPUs: 2</span><br><span class="line">Total Memory: 1.787GiB</span><br><span class="line">Name: master</span><br><span class="line">ID: 235P:KF5C:FQSL:3KDM:Z5AB:63AJ:72XC:I5Y5:4B4E:CTA4:223Y:H6QM</span><br><span class="line">Docker Root Dir: /var/lib/docker</span><br><span class="line">Debug Mode (client): <span class="literal">false</span></span><br><span class="line">Debug Mode (server): <span class="literal">false</span></span><br><span class="line">Registry: https://index.docker.io/v1/</span><br><span class="line">Labels:</span><br><span class="line">Experimental: <span class="literal">false</span></span><br><span class="line">Insecure Registries:</span><br><span class="line"> 127.0.0.0/8</span><br><span class="line">Live Restore Enabled: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p><em>Docker Root Dir: &#x2F;var&#x2F;lib&#x2F;docker</em> 即为docker的默认存储路径</p>
+<h3 id="2-修改daemon-json文件"><a href="#2-修改daemon-json文件" class="headerlink" title="2. 修改daemon.json文件"></a>2. 修改daemon.json文件</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 新建或编辑docker的daemon.json文件</span></span><br><span class="line">vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
+<p>在配置文件中新增如下内容，&#x2F;data&#x2F;docker为要修改的地址</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&#123; </span><br><span class="line">  <span class="string">&quot;data-root&quot;</span>: <span class="string">&quot;/data/docker&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>docker的国内源也可以在这里进行修改，如添加163的源</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&#123; </span><br><span class="line">  <span class="string">&quot;data-root&quot;</span>: <span class="string">&quot;/data/docker&quot;</span>,</span><br><span class="line">  <span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;http://hub-mirror.c.163.com&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-重启docker服务"><a href="#3-重启docker服务" class="headerlink" title="3. 重启docker服务"></a>3. 重启docker服务</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>容器技术</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>修改npm的全局路径</title>
+    <url>/2020/15_npm_modify_cache_path/</url>
+    <content><![CDATA[<p>不想把所有的数据都放在系统盘，因此需要修改npm的全局路径</p>
+<span id="more"></span>
+
+<h3 id="1-查看npm的默认配置"><a href="#1-查看npm的默认配置" class="headerlink" title="1. 查看npm的默认配置"></a>1. 查看npm的默认配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm config get</span><br></pre></td></tr></table></figure>
+<p>控制台输出信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">D:\Coder\nodejs&gt;npm config get</span><br><span class="line">; cli configs</span><br><span class="line">metrics-registry = <span class="string">&quot;https://registry.npmjs.org/&quot;</span></span><br><span class="line">scope = <span class="string">&quot;&quot;</span></span><br><span class="line">user-agent = <span class="string">&quot;npm/6.5.0-next.0 node/v11.6.0 win32 x64&quot;</span></span><br><span class="line"></span><br><span class="line">; <span class="built_in">builtin</span> config undefined</span><br><span class="line">prefix = <span class="string">&quot;C:\\Users\\xxx\\AppData\\Roaming\\npm&quot;</span></span><br><span class="line"></span><br><span class="line">; node bin location = D:\Coder\nodejs\node.exe</span><br><span class="line">; cwd = D:\Coder\nodejs</span><br><span class="line">; HOME = C:\Users\xxx</span><br><span class="line">; <span class="string">&quot;npm config ls -l&quot;</span> to show all defaults.</span><br></pre></td></tr></table></figure>
+<p><em>prefix</em> 为系统盘地址</p>
+<h3 id="2-修改路径"><a href="#2-修改路径" class="headerlink" title="2. 修改路径"></a>2. 修改路径</h3><ol>
+<li>在要修改地址创建”node_global”及”node_cache”两个文件夹，用于后续的配置</li>
+<li>在命令行执行如下命令<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 全局安装位置</span></span><br><span class="line">npm config <span class="built_in">set</span> prefix <span class="string">&quot;D:\Coder\nodejs\node_global&quot;</span></span><br><span class="line"><span class="comment"># 缓存文件位置</span></span><br><span class="line">npm config <span class="built_in">set</span> cache <span class="string">&quot;D:\Coder\nodejs\node_cache&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li>查看、验证修改后的配置<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm config get</span><br></pre></td></tr></table></figure>
+控制台输出信息<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">D:\Coder\nodejs&gt;npm config get</span><br><span class="line">; cli configs</span><br><span class="line">metrics-registry = <span class="string">&quot;https://registry.npmjs.org/&quot;</span></span><br><span class="line">scope = <span class="string">&quot;&quot;</span></span><br><span class="line">user-agent = <span class="string">&quot;npm/6.5.0-next.0 node/v11.6.0 win32 x64&quot;</span></span><br><span class="line"></span><br><span class="line">; userconfig C:\Users\Liyp\.npmrc</span><br><span class="line">cache = <span class="string">&quot;D:\\Coder\\nodejs\\node_cache&quot;</span></span><br><span class="line">prefix = <span class="string">&quot;D:\\Coder\\nodejs\\node_global&quot;</span></span><br><span class="line"></span><br><span class="line">; <span class="built_in">builtin</span> config undefined</span><br><span class="line"></span><br><span class="line">; node bin location = D:\Coder\nodejs\node.exe</span><br><span class="line">; cwd = D:\Coder\nodejs</span><br><span class="line">; HOME = C:\Users\xxx</span><br><span class="line">; <span class="string">&quot;npm config ls -l&quot;</span> to show all defaults.</span><br></pre></td></tr></table></figure></li>
+<li>修改环境变量（win）<br>需要把新路径（D:\Coder\nodejs\node_global）添加到环境变量</li>
+</ol>
+<h3 id="3-恢复默认地址"><a href="#3-恢复默认地址" class="headerlink" title="3. 恢复默认地址"></a>3. 恢复默认地址</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 全局安装位置</span></span><br><span class="line">npm config delete cache</span><br><span class="line"><span class="comment"># 缓存文件位置</span></span><br><span class="line">npm config delete prefix</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-使用taobao源加速npm"><a href="#4-使用taobao源加速npm" class="headerlink" title="4.使用taobao源加速npm"></a>4.使用taobao源加速npm</h3><p>在要install或者update的命令后面附加 <strong>–registry&#x3D;<a href="https://registry.npm.taobao.org/">https://registry.npm.taobao.org</a></strong> 即可，如：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install xxx --registry=https://registry.npm.taobao.org</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>前端技术</category>
+      </categories>
+      <tags>
+        <tag>Node.js</tag>
+        <tag>NPM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用putty客户端执行远程主机命令的bat脚本</title>
+    <url>/202x/2021/16_putty_ssh_bat_script/</url>
+    <content><![CDATA[<p>在 window 系统中，利用 Putty 工具实现 ssh 登录连接到远程的 Linux 系统上，可以实现 linux 中的远程 ssh、远程 scp 命令的功能</p>
+<span id="more"></span>
+
+<h3 id="1-安装-Putty"><a href="#1-安装-Putty" class="headerlink" title="1. 安装 Putty"></a>1. 安装 Putty</h3><p>在<a href="https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html">Putty 下载页面</a>中，根据自己客户端的实际情况选择相应的版本，之后进行安装。</p>
+<h3 id="2-编写-Bat-脚本"><a href="#2-编写-Bat-脚本" class="headerlink" title="2. 编写 Bat 脚本"></a>2. 编写 Bat 脚本</h3><p>以下为之前已经使用过的脚本，主要的功能如下：</p>
+<ul>
+<li>svn 更新代码</li>
+<li>maven 编译打包</li>
+<li>以日期格式修改 jar 包的名字</li>
+<li>上传 jar 包到远程 linux 服务器上</li>
+<li>执行远程 linux 服务器上的 shell 脚本，启动服务</li>
+</ul>
+<p>具体的逻辑可以看脚本中的注释，其中使用到了 Putty 中的 plink（实现 ssh 功能）、pscp（实现 scp 功能）。</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> inputStr=<span class="variable">%1%</span></span><br><span class="line"><span class="built_in">set</span> isUpload=<span class="variable">%2%</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> &quot;输入参数：<span class="variable">%inputStr%</span>&quot;</span><br><span class="line"><span class="keyword">if</span> &quot;swdj&quot;==&quot;<span class="variable">%inputStr%</span>&quot; (</span><br><span class="line">	<span class="built_in">set</span> jarName=zzs_swdj</span><br><span class="line">	<span class="built_in">set</span> jarPath=D:\Developer\IdeaProjects\swdj\target\zzs_swdj.jar</span><br><span class="line">	<span class="built_in">set</span> projectDir=D:\Developer\IdeaProjects\dzfp_xc\zzs_swdjkphd</span><br><span class="line"><span class="comment">	rem 远程服务器信息</span></span><br><span class="line">	<span class="built_in">set</span> remoteBashPath=/data/swdj_startup.sh</span><br><span class="line">) ^</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> &quot;fpkj&quot;==&quot;<span class="variable">%inputStr%</span>&quot; (</span><br><span class="line">	<span class="built_in">set</span> jarName=zzs_fpkj</span><br><span class="line">	<span class="built_in">set</span> projectDir=D:\Developer\IdeaProjects\fpkj</span><br><span class="line">	<span class="built_in">set</span> jarPath=D:\Developer\IdeaProjects\fpkj\target\zzs_fpkj.jar</span><br><span class="line"><span class="comment">	rem 远程服务器信息</span></span><br><span class="line">	<span class="built_in">set</span> remoteBashPath=/data/fpkj_startup.sh</span><br><span class="line">) ^</span><br><span class="line"><span class="keyword">else</span> (</span><br><span class="line">	<span class="built_in">echo</span> &quot;参数错误&quot;</span><br><span class="line">)</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%jarName%</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> jarDir=D:\Developer\IdeaProjects\</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem 远程服务器信息 #性能：124.70.81.5 功能：119.3.224.85</span></span><br><span class="line"><span class="built_in">set</span> remoteIp=<span class="number">124</span>.<span class="number">70</span>.<span class="number">81</span>.<span class="number">5</span></span><br><span class="line"><span class="built_in">set</span> remoteUser=root</span><br><span class="line"><span class="built_in">set</span> remotePwd=LWiQ1U0B</span><br><span class="line"><span class="built_in">set</span> remoteDirPath=/data/jars/<span class="variable">%jarName%</span></span><br><span class="line"><span class="comment">rem set remoteBashPath=/data/fpkj_startup.sh</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> &quot;true&quot; == &quot;<span class="variable">%isUpload%</span>&quot; (</span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;只是上传文件&quot;</span><br><span class="line">	<span class="keyword">goto</span> :upload</span><br><span class="line">)</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; svn更新</span></span><br><span class="line"><span class="built_in">echo</span> &quot;&gt;&gt;&gt; 开始更新应用&quot;</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%projectDir%</span></span><br><span class="line"><span class="built_in">cd</span> /d <span class="variable">%projectDir%</span></span><br><span class="line">svn update</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; maven构建</span></span><br><span class="line"><span class="built_in">echo</span> &quot;&gt;&gt;&gt; 开始构建应用&quot;</span><br><span class="line"><span class="keyword">call</span> mvn clean package</span><br><span class="line"><span class="built_in">echo</span> &quot;&gt;&gt;&gt; 构建应用成功&quot;</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 复制jar包</span></span><br><span class="line"><span class="built_in">echo</span> &quot;&gt;&gt;&gt; 复制jar包&quot;</span><br><span class="line"><span class="built_in">cd</span> /d <span class="variable">%jarDir%</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> &quot;<span class="variable">%date:~0,4%</span><span class="variable">%date:~5,2%</span><span class="variable">%date:~8,2%</span>&quot;</span><br><span class="line"><span class="built_in">set</span> dateStr=&quot;<span class="variable">%date:~5,2%</span><span class="variable">%date:~8,2%</span>&quot;</span><br><span class="line"><span class="built_in">set</span> timeStr=&quot;<span class="variable">%time:~0,2%</span><span class="variable">%time:~3,2%</span>&quot;</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> /a jarNum=<span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> /f <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /b/o-d/a-d <span class="variable">%jarDir%</span>\<span class="variable">%jarName%</span>_<span class="variable">%dateStr%</span>*.jar&#x27;) <span class="keyword">do</span> (</span><br><span class="line">	<span class="built_in">set</span> /a jarNum += <span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="built_in">set</span> /a jarNum += <span class="number">1</span></span><br><span class="line"><span class="built_in">set</span> newJarName=</span><br><span class="line"><span class="keyword">if</span> <span class="variable">%jarNum%</span> <span class="keyword">lss</span> <span class="number">10</span> (</span><br><span class="line">	<span class="built_in">set</span> newJarName=<span class="variable">%jarName%</span>_<span class="variable">%dateStr%</span>_0<span class="variable">%jarNum%</span>_dev128.jar</span><br><span class="line">) <span class="keyword">else</span> (</span><br><span class="line">	<span class="built_in">set</span> newJarName=<span class="variable">%jarName%</span>_<span class="variable">%dateStr%</span>_<span class="variable">%jarNum%</span>_dev128.jar</span><br><span class="line">)</span><br><span class="line"><span class="built_in">copy</span> <span class="variable">%jarPath%</span> <span class="variable">%newJarName%</span></span><br><span class="line"><span class="built_in">echo</span> &quot;&gt;&gt;&gt; 复制jar包成功&quot;</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%newJarName%</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 上传jar包</span></span><br><span class="line"><span class="keyword">goto</span> :ok</span><br><span class="line">:upload</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> &quot;远程服务器IP：<span class="variable">%remoteIp%</span>&quot;</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%remoteDirPath%</span></span><br><span class="line"><span class="comment">rem 查找目录下日期最新的文件</span></span><br><span class="line"><span class="keyword">for</span> /f <span class="variable">%%i</span> <span class="keyword">in</span> (&#x27;<span class="built_in">dir</span> /b/o-d/a-d <span class="variable">%jarDir%</span>\<span class="variable">%jarName%</span>*.jar&#x27;) <span class="keyword">do</span> (</span><br><span class="line">	<span class="built_in">echo</span> <span class="variable">%%i</span></span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt; 开始上传文件&quot;</span><br><span class="line">	pscp -l <span class="variable">%remoteUser%</span> -pw <span class="variable">%remotePwd%</span> -P <span class="number">22</span> -r ./<span class="variable">%%i</span> <span class="variable">%remoteUser%</span>@<span class="variable">%remoteIp%</span>:<span class="variable">%remoteDirPath%</span></span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt; 上传文件成功&quot;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt; 执行远程脚本&quot;</span><br><span class="line">	plink -batch -pw <span class="variable">%remotePwd%</span> -P <span class="number">22</span> <span class="variable">%remoteUser%</span>@<span class="variable">%remoteIp%</span> &quot;<span class="built_in">cd</span> /data&quot;</span><br><span class="line">	plink -batch -pw <span class="variable">%remotePwd%</span> -P <span class="number">22</span> <span class="variable">%remoteUser%</span>@<span class="variable">%remoteIp%</span> <span class="variable">%remoteBashPath%</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt; 执行远程命令&quot;</span><br><span class="line">	TIMEOUT /T <span class="number">3</span></span><br><span class="line">	plink -batch -pw <span class="variable">%remotePwd%</span> -P <span class="number">22</span> <span class="variable">%remoteUser%</span>@<span class="variable">%remoteIp%</span> &quot;ls -l /data&quot;</span><br><span class="line">	<span class="built_in">echo</span> &quot;&gt;&gt;&gt; 查询端口号，请等候...&quot;</span><br><span class="line">	TIMEOUT /T <span class="number">10</span></span><br><span class="line">	plink -batch -pw <span class="variable">%remotePwd%</span> -P <span class="number">22</span> <span class="variable">%remoteUser%</span>@<span class="variable">%remoteIp%</span> &quot;netstat -nplt&quot;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">goto</span> :ok</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">:ok</span><br><span class="line"><span class="built_in">pause</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-执行-Bat-脚本"><a href="#3-执行-Bat-脚本" class="headerlink" title="3. 执行 Bat 脚本"></a>3. 执行 Bat 脚本</h3><p>bat 脚本有两个参数：</p>
+<ol>
+<li>jar 包或者项目的名称，if 分支处理</li>
+<li>是否只是上传 jar 包，默认是只编译打包，不上传</li>
+</ol>
+<p>示例 1：编译打包 swdj 的项目</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">build_zspringboot.bat swdj</span><br></pre></td></tr></table></figure>
+
+<p>示例 2：上传 swdj 的 jar 包到远程 linux 服务器上</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">build_zspringboot.bat swdj true</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>脚本命令</category>
+      </categories>
+      <tags>
+        <tag>bat</tag>
+        <tag>shell</tag>
+        <tag>putty</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用shell脚本通过ssh批量执行命令</title>
+    <url>/202x/2021/17_batch_ssh_shell_script/</url>
+    <content><![CDATA[<p>通过提供 ip 地址，在多个远程 linux 主机上执行的 bash 命令，包括 ssh、scp</p>
+<span id="more"></span>
+
+<h3 id="1-shell-脚本说明"><a href="#1-shell-脚本说明" class="headerlink" title="1. shell 脚本说明"></a>1. shell 脚本说明</h3><p>shell 脚本类型:</p>
+<ul>
+<li>ssh：远程执行 linux 命令</li>
+<li>cp：复制文件到远程服务器</li>
+<li>ssh_local：在远程服务器上，执行本地的 shell 脚本的命令</li>
+</ul>
+<h3 id="2-shell-脚本内容"><a href="#2-shell-脚本内容" class="headerlink" title="2. shell 脚本内容"></a>2. shell 脚本内容</h3><blockquote>
+<p>该脚本连接远程 linux 是通过免密登录的方式，用户名密码登录可以借助sshpass命令完成</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sshpass -p 密码 ssh root@localhost</span><br><span class="line">sshpass -p 密码 scp ~/file root@localhost:/tmp/file</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-主脚本内容"><a href="#2-1-主脚本内容" class="headerlink" title="2.1. 主脚本内容"></a>2.1. 主脚本内容</h4><p>cmd-batch.sh</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#echo &quot;TYPE: $1&quot;</span></span><br><span class="line"></span><br><span class="line">user_name=<span class="string">&quot;root&quot;</span></span><br><span class="line"><span class="comment">#pem_path=&quot;-i ./.ssh/ecs.pem&quot;</span></span><br><span class="line">pem_path=<span class="string">&quot;&quot;</span></span><br><span class="line"><span class="built_in">timeout</span>=3</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;_______________________________________________________________________________&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ <span class="variable">$1</span> = <span class="string">&quot;ssh&quot;</span> ]];<span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; IP: <span class="variable">$2</span> -&gt; CMD: <span class="variable">$3</span> &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span></span><br><span class="line">  ssh -o <span class="string">&quot;StrictHostKeyChecking no&quot;</span>  -o ConnectTimeout=<span class="variable">$&#123;timeout&#125;</span> <span class="variable">$&#123;pem_path&#125;</span>  <span class="variable">$&#123;user_name&#125;</span>@<span class="variable">$2</span> <span class="variable">$3</span></span><br><span class="line">  <span class="keyword">if</span> [[ $? -ne 0 ]];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;command exec failed&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">  <span class="comment">#result=`ssh -o &quot;StrictHostKeyChecking no&quot;  -o ConnectTimeout=$&#123;timeout&#125; -i $&#123;pem_path&#125;  $&#123;user_name&#125;@$2 $3`</span></span><br><span class="line">  <span class="comment">#echo $&#123;result&#125;</span></span><br><span class="line"><span class="keyword">elif</span> [[ <span class="variable">$1</span> = <span class="string">&quot;cp&quot;</span> ]];<span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; IP: <span class="variable">$2</span> -&gt; localPath: <span class="variable">$3</span> -&gt; remotePath: <span class="variable">$4</span> &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span></span><br><span class="line">  scp -o <span class="string">&quot;StrictHostKeyChecking no&quot;</span>  -o ConnectTimeout=<span class="variable">$&#123;timeout&#125;</span> <span class="variable">$&#123;pem_path&#125;</span> <span class="variable">$3</span> <span class="variable">$&#123;user_name&#125;</span>@<span class="variable">$2</span>:<span class="variable">$4</span></span><br><span class="line">  <span class="keyword">if</span> [[ $? -ne 0 ]];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;command exec failed&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">elif</span> [[ <span class="variable">$1</span> = <span class="string">&quot;ssh_local&quot;</span> ]];<span class="keyword">then</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; IP: <span class="variable">$2</span> -&gt; CMD: <span class="variable">$3</span> &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span></span><br><span class="line">  ssh -o <span class="string">&quot;StrictHostKeyChecking no&quot;</span>  -o ConnectTimeout=<span class="variable">$&#123;timeout&#125;</span> <span class="variable">$&#123;pem_path&#125;</span>  <span class="variable">$&#123;user_name&#125;</span>@<span class="variable">$2</span> &lt; <span class="variable">$3</span></span><br><span class="line">  <span class="keyword">if</span> [[ $? -ne 0 ]];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;command exec failed&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-2-ip-地址文件"><a href="#2-2-ip-地址文件" class="headerlink" title="2.2. ip 地址文件"></a>2.2. ip 地址文件</h4><p>ecs-ip-list.txt</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">192.168.100.1</span><br><span class="line">192.168.100.2</span><br><span class="line">192.168.100.3</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-批量复制文件脚本"><a href="#2-3-批量复制文件脚本" class="headerlink" title="2.3. 批量复制文件脚本"></a>2.3. 批量复制文件脚本</h4><p>cp-batch.sh</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> `<span class="built_in">cat</span> ./ecs-ip-list.txt`</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="comment">#echo $line;</span></span><br><span class="line">  <span class="comment">#ip=$line;</span></span><br><span class="line">  <span class="keyword">if</span> [[ <span class="variable">$&#123;ip&#125;</span> != *<span class="comment">#* ]]; then</span></span><br><span class="line">  ./cmd-batch.sh <span class="string">&quot;cp&quot;</span> <span class="variable">$&#123;ip&#125;</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="string">&quot;<span class="variable">$2</span>&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-批量执行命令脚本"><a href="#2-4-批量执行命令脚本" class="headerlink" title="2.4. 批量执行命令脚本"></a>2.4. 批量执行命令脚本</h4><p>ssh-batch.sh</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> `<span class="built_in">cat</span> ./ecs-ip-list.txt`</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="keyword">if</span> [[ <span class="variable">$&#123;ip&#125;</span> != *<span class="comment">#* ]]; then</span></span><br><span class="line">  ./cmd-batch.sh <span class="string">&quot;ssh&quot;</span> <span class="variable">$&#123;ip&#125;</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-批量执行本地命令脚本"><a href="#2-5-批量执行本地命令脚本" class="headerlink" title="2.5. 批量执行本地命令脚本"></a>2.5. 批量执行本地命令脚本</h4><p>ssh-local-batch.sh</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">for</span> ip <span class="keyword">in</span> `<span class="built_in">cat</span> ./ecs-ip-list.txt`</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="keyword">if</span> [[ <span class="variable">$&#123;ip&#125;</span> != *<span class="comment">#* ]]; then</span></span><br><span class="line">  ./cmd-batch.sh <span class="string">&quot;ssh_local&quot;</span> <span class="variable">$&#123;ip&#125;</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-6-单个执行命令脚本"><a href="#2-6-单个执行命令脚本" class="headerlink" title="2.6. 单个执行命令脚本"></a>2.6. 单个执行命令脚本</h4><p>ssh-single.sh</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;IP: <span class="variable">$1</span>&quot;</span></span><br><span class="line">./cmd-batch.sh <span class="string">&quot;ssh&quot;</span> <span class="variable">$1</span> <span class="string">&quot;<span class="variable">$2</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-shell-脚本执行示例"><a href="#3-shell-脚本执行示例" class="headerlink" title="3. shell 脚本执行示例"></a>3. shell 脚本执行示例</h3><p>示例 1：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ssh-batch.sh ll</span><br></pre></td></tr></table></figure>
+
+<p>示例 2：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./cp-batch.sh <span class="string">&quot;a.jar&quot;</span> <span class="string">&quot;/data/jars/&quot;</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>脚本命令</category>
+      </categories>
+      <tags>
+        <tag>Shell</tag>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Springboot热部署</title>
+    <url>/202x/2021/18_spring_boot_reload/</url>
+    <content><![CDATA[<p>通过设置实现 Springboot 项目在修改代码的时候，不进行冷启动，直接使用 springboot 提供的热部署功能</p>
+<span id="more"></span>
+
+<h3 id="1-Maven-项目添加-pom-依赖"><a href="#1-Maven-项目添加-pom-依赖" class="headerlink" title="1. Maven 项目添加 pom 依赖"></a>1. Maven 项目添加 pom 依赖</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!--SpringBoot热部署配置 --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</span><br><span class="line">    &lt;scope&gt;runtime&lt;/scope&gt;</span><br><span class="line">    &lt;optional&gt;true&lt;/optional&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br><span class="line"></span><br><span class="line">&lt;plugin&gt;</span><br><span class="line">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</span><br><span class="line">    &lt;configuration&gt;</span><br><span class="line">        &lt;fork&gt;true&lt;/fork&gt;</span><br><span class="line">    &lt;/configuration&gt;</span><br><span class="line">&lt;/plugin&gt;</span><br></pre></td></tr></table></figure>
+
+<p>热部署生效后，日志中的线程名称是[restartedMain]，会加载两次，但比冷启动的时间要短很多</p>
+<h3 id="2-修改-IDEA-设置"><a href="#2-修改-IDEA-设置" class="headerlink" title="2. 修改 IDEA 设置"></a>2. 修改 IDEA 设置</h3><p>如果想要自动编译，需要在 Idea 上修改如下两个配置：</p>
+<ul>
+<li>Settings -&gt; Build -&gt; Compiler 中勾选 Build project automatically 选项</li>
+<li>Settings -&gt; Advanced Settings 中勾选 Allow auto-make to start even if developed application is currently running 选项<blockquote>
+<p>注：在修改代码后，需要稍微等待一会儿，才会生效</p>
+</blockquote>
+</li>
+</ul>
+<p>如果不想要每次修改代码后都自动进行加载，可以进行手动编译：</p>
+<ul>
+<li>Build -&gt; Build Project</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Springboot</tag>
+        <tag>Maven</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常用Shell脚本命令</title>
+    <url>/202x/2021/19_common_used_shell_script/</url>
+    <content><![CDATA[<p>记录下日常经常使用到的Shell脚本的命令，以备不时之用，已包括sed</p>
+<span id="more"></span>
+
+<h3 id="1-sed-从日志中截取打印指定内容"><a href="#1-sed-从日志中截取打印指定内容" class="headerlink" title="1. sed - 从日志中截取打印指定内容"></a>1. sed - 从日志中截取打印指定内容</h3><p>需求：将kafka日志中的offset的数值提取打印出来，查看是否有中断</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># a.log中的内容示例：xx offset: 500,par: 1</span></span><br><span class="line"><span class="built_in">cat</span> a.log | sed <span class="string">&#x27;s/,/\n/g&#x27;</span> | grep <span class="string">&quot;offset&quot;</span> | sed <span class="string">&#x27;s/:/\n/g&#x27;</span> | sed <span class="string">&#x27;1d&#x27;</span> | sed <span class="string">&#x27;s/ //g&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>说明：</p>
+<ol>
+<li>sed ‘s&#x2F;,&#x2F;\n&#x2F;g’  将所有的逗号替换为换行符，</li>
+<li>sed ‘s&#x2F;:&#x2F;\n&#x2F;g’  将冒号替换为换行符；</li>
+<li>sed ‘1d’  删除第1行</li>
+<li>sed ‘s&#x2F; &#x2F;&#x2F;g’  删除空格</li>
+</ol>
+<h3 id="2-wc-计算文件中的行数"><a href="#2-wc-计算文件中的行数" class="headerlink" title="2. wc 计算文件中的行数"></a>2. wc 计算文件中的行数</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">wc</span> -l <span class="built_in">cat</span> a.log</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>脚本命令</category>
+      </categories>
+      <tags>
+        <tag>shell</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>修改Foxmail的邮件存储位置</title>
+    <url>/202x/2022/01_modify_foxmail_storage_path/</url>
+    <content><![CDATA[<p>Foxmail没有提供可视化界面的方式来修改邮件的存储位置，但是可以通过修改配置文件来实现邮件存储位置的变更。</p>
+<span id="more"></span>
+
+<h3 id="1-找到配置文件"><a href="#1-找到配置文件" class="headerlink" title="1. 找到配置文件"></a>1. 找到配置文件</h3><p>Foxmail存储邮件的路径在名字为FMStorage.list的配置文件中</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">rem 配置文件位置示例</span></span><br><span class="line"><span class="function">C:\<span class="title">Program</span> <span class="title">Files</span>\<span class="title">Foxmail</span> 7.2\<span class="title">FMStorage.list</span></span></span><br><span class="line"><span class="function"><span class="comment"></span></span></span><br><span class="line"><span class="comment"><span class="function">rem 配置文件中的内容如下</span></span></span><br><span class="line"><span class="function"><span class="title">Storage</span>\<span class="title">xxx</span>@163.<span class="title">com</span>\</span></span><br><span class="line"><span class="function"><span class="title">Storage</span>\<span class="title">yyy</span>@126.<span class="title">com</span>\</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-迁移数据"><a href="#2-迁移数据" class="headerlink" title="2. 迁移数据"></a>2. 迁移数据</h3><p>Storage默认在Foxmail的安装目录下，如：<br>C:\Program Files\Foxmail 7.2\Storage</p>
+<p>先关闭Foxmail软件，将安装目录下Storage文件夹里面的所有内容剪切到想要转移的目录下，例如：D:\Documents\Foxmail\Storage</p>
+<h3 id="3-修改配置文件"><a href="#3-修改配置文件" class="headerlink" title="3. 修改配置文件"></a>3. 修改配置文件</h3><p>将FMStorage.list中的配置按照最新的路径进行修改，如</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">rem FMStorage.list文件中的内容：</span></span><br><span class="line"><span class="function">D:\<span class="title">Documents</span>\<span class="title">Foxmail</span>\<span class="title">Storage</span>\<span class="title">xxx</span>@163.<span class="title">com</span>\</span></span><br><span class="line"><span class="function"><span class="title">D</span>:\<span class="title">Documents</span>\<span class="title">Foxmail</span>\<span class="title">Storage</span>\<span class="title">yyy</span>@126.<span class="title">com</span>\</span></span><br></pre></td></tr></table></figure>
+
+<p>之后启动软件即可。</p>
+]]></content>
+      <categories>
+        <category>日常软件</category>
+      </categories>
+      <tags>
+        <tag>Foxmail</tag>
+        <tag>Windows</tag>
+      </tags>
+  </entry>
+</search>

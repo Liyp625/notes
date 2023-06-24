@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="6zFVlrl6N8PGGHVJIVF2Q5KLnp--0DJ2YhC_E0aqCX8">
+  <meta name="baidu-site-verification" content="codeva-QNgakFdbCW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"notes.itxds.cn","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.17.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"mac"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="JavaScript创建对象常见的几种创建对象的方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript系列之一：创建对象">
+<meta property="og:url" content="https://notes.itxds.cn/2017/js-series-one-create-object/index.html">
+<meta property="og:site_name" content="Evan625&#39;s Notes">
+<meta property="og:description" content="JavaScript创建对象常见的几种创建对象的方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-11-07T05:27:19.000Z">
+<meta property="article:modified_time" content="2023-06-24T15:50:44.889Z">
+<meta property="article:author" content="Evan625">
+<meta property="article:tag" content="JavaScript">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://notes.itxds.cn/2017/js-series-one-create-object/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://notes.itxds.cn/2017/js-series-one-create-object/","path":"2017/js-series-one-create-object/","title":"JavaScript系列之一：创建对象"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JavaScript系列之一：创建对象 | Evan625's Notes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YRK8ECNYES"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YRK8ECNYES","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?0464a826b7bdfd5e90180d9117fed20a"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Evan625's Notes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">开启一个孤独而欢快的程序之旅</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">24</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">8</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">19</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%80%9A%E8%BF%87Object%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1"><span class="nav-text">1. 通过Object构造函数创建对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%9A%E8%BF%87%E5%AD%97%E9%9D%A2%E9%87%8F%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1"><span class="nav-text">2. 通过字面量创建对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F"><span class="nav-text">3. 工厂模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E6%A8%A1%E5%BC%8F"><span class="nav-text">4. 构造函数模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-text">5. 原型模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%92%8C%E5%8E%9F%E5%9E%8B%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-text">6. 构造函数和原型混合模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E5%8A%A8%E6%80%81%E5%8E%9F%E5%9E%8B%E6%A8%A1%E5%BC%8F"><span class="nav-text">7. 动态原型模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E5%AF%84%E7%94%9F%E7%9A%84%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E6%A8%A1%E5%BC%8F"><span class="nav-text">8. 寄生的构造函数模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E7%A8%B3%E5%A6%A5%E7%9A%84%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E6%A8%A1%E5%BC%8F"><span class="nav-text">9. 稳妥的构造函数模式</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Evan625"
+      src="/images/weizhuang.jpg">
+  <p class="site-author-name" itemprop="name">Evan625</p>
+  <div class="site-description" itemprop="description">一个走在从入门到放弃之路的人</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://notes.itxds.cn/2017/js-series-one-create-object/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/weizhuang.jpg">
+      <meta itemprop="name" content="Evan625">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Evan625's Notes">
+      <meta itemprop="description" content="一个走在从入门到放弃之路的人">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JavaScript系列之一：创建对象 | Evan625's Notes">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaScript系列之一：创建对象
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-11-07 13:27:19" itemprop="dateCreated datePublished" datetime="2017-11-07T13:27:19+08:00">2017-11-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%89%8D%E7%AB%AF%E6%8A%80%E6%9C%AF/" itemprop="url" rel="index"><span itemprop="name">前端技术</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>JavaScript创建对象常见的几种创建对象的方式。</p>
+<span id="more"></span>
+
+<h3 id="1-通过Object构造函数创建对象"><a href="#1-通过Object构造函数创建对象" class="headerlink" title="1. 通过Object构造函数创建对象"></a>1. 通过Object构造函数创建对象</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    var person=new Object();</span><br><span class="line">    person.nam=&quot;lxy&quot;;</span><br><span class="line">    person.age=&quot;22&quot;;</span><br><span class="line">    person.job=&quot;Software Engineer&quot;;</span><br><span class="line">    person.sayName= function () &#123;</span><br><span class="line">        alert(this.nam);</span><br><span class="line">    &#125;</span><br><span class="line">    person.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>优点：简单</p>
+<h3 id="2-通过字面量创建对象"><a href="#2-通过字面量创建对象" class="headerlink" title="2. 通过字面量创建对象"></a>2. 通过字面量创建对象</h3><p>早期JS开发人员经常使用new Object()创建对象，几年后对象字面量称为创建对象的首选模式。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    var person = &#123;</span><br><span class="line">        name:&quot;lxy&quot;,</span><br><span class="line">        age:22,</span><br><span class="line">        job:&quot;Software Engineer&quot;,</span><br><span class="line">        sayName:function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    person.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>要注意一点就是每声明一个键值对后面标点是“,”。</p>
+<p>这些属性在创建时都带有一些特征值（characteristic），JavaScript通过这些特征值来定义它们的行为。</p>
+<p>对象字面量相对于Object构造函数代码量少了一点点。但是这2种方法通过一个接口创建很多对象，会产生大量重复代码。Don’t Repeat Yourself！我们需要对重复的代码进行抽象。工厂模式就是在这种情况下出现的。</p>
+<h3 id="3-工厂模式"><a href="#3-工厂模式" class="headerlink" title="3. 工厂模式"></a>3. 工厂模式</h3><p>工厂模式是软件工程领域一种广为人知的设计模式，这种模式抽象了创建具体对象的过程。</p>
+<p>通过类来创建多个实例必然可以减少代码重复，但是ECMAScript中无法创建类，所以就用函数来封装以特定接口创建对象的细节。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function createPerson(name, age, job)&#123;</span><br><span class="line">        var o=new Object();</span><br><span class="line">        o.name=name;</span><br><span class="line">        o.age=age;</span><br><span class="line">        o.job=job;</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=createPerson(&quot;lxy&quot;, 22, &quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=createPerson(&quot;strangerA&quot;, 24, &quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>工厂模式减少了重复代码，但是不能够识别对象，所有实例都是object类型的。这时构造函数模式就出现了。</p>
+<h3 id="4-构造函数模式"><a href="#4-构造函数模式" class="headerlink" title="4. 构造函数模式"></a>4. 构造函数模式</h3><p>像Object和Array这样的原生构造函数，在运行时会自动出现在执行环境中。我们可以创建自定义构造函数，从而创建特定类型的对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function Person(name ,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=new Person(&quot;strangerA&quot;,24,&quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>构造函数中首字母大写，而非构造函数首字母小写作为区别。</p>
+<p>通过new操作符来创建Person实例，这样创建的实例都有一个constractor(构造函数)属性，该属性指向Person。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">alert(lxy.constructor==Person); //true</span><br><span class="line">alert(strangerA.constructor==Person); //true</span><br></pre></td></tr></table></figure>
+<p>lxy和strangeA是Person的实例，同时也是Object的实例。因为所有的对象都继承自Object。</p>
+<p>创建自定义构造函数意味着将来可以将它的实例标识为一种特定的类型；而这正是构造函数胜过工厂模式的地方。</p>
+<p>构造函数也是函数，所以语法上可以像普通函数一样去用，但是可以用并不代表应该用，还是以构造函数的方式用更合理。</p>
+<p>构造函数的问题是，同一构造函数的不同实例的相同方法是不一样的。</p>
+<p>alert(lxy.sayName&#x3D;&#x3D;strangerA.sayName());&#x2F;&#x2F;false</p>
+<p>这个问题很好理解，因为js中函数就是对象，每定义一个函数，也就是实例化了一个对象。</p>
+<p>从代码的角度可能理解的更深刻：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">this.sayName=function()&#123;alert(this.name)&#125;;与</span><br><span class="line">this.sayName=new Function(alert(this.name));是等价的。</span><br></pre></td></tr></table></figure>
+<p>所以使用构造函数创建对象，每个方法在每个实例上都要重新实现一遍，一是耗资源，二是创建两个或者多个完成同样任务的Function没有必要，三是有this在，没必要在代码执行前就把函数绑定到特定对象上。</p>
+<p>所以，有一种方法是说把函数定义转移到构造函数外部，代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    function Person(name ,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.sayName=sayName;</span><br><span class="line">    &#125;</span><br><span class="line">    function sayName()&#123;</span><br><span class="line">        alert(this.name);</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    var strangerA=new Person(&quot;strangerA&quot;,24,&quot;Doctor&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    strangerA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>把sayName()函数的定义转移到构造函数外部，成为全局的函数，构造函数内部把sayName赋为为全局的sayName。这样sayName是一个指向外部函数的指针，因此lxy和strangeA就共享了 全局的sayName函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alert(lxy.sayName==strangerA.sayName);//true</span><br></pre></td></tr></table></figure>
+<p>但是这会有更糟糕的问题：全局作用域的函数只能被某个对象调用，这名不副实啊，会造成对全局环境的污染；更糟糕的是构造函数有多少个方法，就要定义多少个全局函数， 那构造函数就丝毫没有封装性可言了。</p>
+<p>但是这样的想法是可贵的，为原型模式做了铺垫，构造函数创建对象问题的解决办法是原型模式。</p>
+<h3 id="5-原型模式"><a href="#5-原型模式" class="headerlink" title="5. 原型模式"></a>5. 原型模式</h3><p>原型模式就是把构造函数中方法拿出来的基础上，为了避免对全局环境的污染，再做了一层封装，但是毕竟是一种新的模式，它封装的更彻底，而且也不是把所有的函数都封装，而是恰到好处的把构造函数中公共的方法和属性进行了封装。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person()&#123;</span><br><span class="line">    </span><br><span class="line">    &#125;</span><br><span class="line">    Person.prototype.name=&quot;lxy&quot;;</span><br><span class="line">    Person.prototype.age=22;</span><br><span class="line">    Person.prototype.job=&quot;Software Engineer&quot;;</span><br><span class="line">    Person.prototype.sayName=function()&#123;</span><br><span class="line">        alert(this.name);</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    var lxy=new Person();</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    var personA=new Person();</span><br><span class="line">    personA.sayName();</span><br><span class="line">    alert(lxy.sayName()==personA.sayName());//true</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用原型的好处是可以让所有的实例共享它所包含的属性和方法。完美的解决了构造函数的问题。因为原型是js中的一个核心内容，其信息量很大，所以另作介绍，有兴趣可看《javascript原型Prototype》。</p>
+<p>原型也有它本身的问题，共享的属性值如果是引用类型，一个实例对该属性的修改会影响到其他实例。这正是原型模式很少单独被使用的原因。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">function Person()&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">Person.prototype.name=&quot;lxy&quot;;</span><br><span class="line">Person.prototype.age=22;</span><br><span class="line">Person.prototype.job=&quot;Software Engineer&quot;;</span><br><span class="line">Person.prototype.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">Person.prototype.sayName=function()&#123;</span><br><span class="line">    alert(this.name);</span><br><span class="line">&#125;</span><br><span class="line">     </span><br><span class="line">     var lxy=new Person();</span><br><span class="line">     var personA=new Person();</span><br><span class="line">     alert(lxy.friends);//friend1,friend2</span><br><span class="line">     alert(personA.friends);//friend1,friend2</span><br><span class="line">     alert(lxy.friends==personA.friends);//true</span><br><span class="line">     lxy.friends.push(&quot;friend3&quot;);</span><br><span class="line">     alert(lxy.friends);//friend1,friend2,friend3</span><br><span class="line">     alert(personA.friends);//friend1,friend2,friend3</span><br><span class="line">     alert(lxy.friends==personA.friends);//true</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="6-构造函数和原型混合模式"><a href="#6-构造函数和原型混合模式" class="headerlink" title="6. 构造函数和原型混合模式"></a>6. 构造函数和原型混合模式</h3><p>创建自定义类型的最常见方式，就是组合使用构造函数模式和原型模式。构造函数模式用于定义实例属性，而原型模式用于定义共享的方法和属性。结果，每个实例都有一份实例属性的副本，同时又共享着对方法的引用，最大限度的节省了内存。另外，这种混合模式还支持向构造函数传递参数，可谓是集两种模式之长。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Person.prototype=&#123;</span><br><span class="line">        constructor : Person,</span><br><span class="line">        sayName : function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">     var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">     var personA=new Person(&quot;personA&quot;,25,&quot;Doctor&quot;);</span><br><span class="line">     alert(lxy.friends); //friend1,friend2</span><br><span class="line">     alert(personA.friends); //friend1,friend2</span><br><span class="line">     alert(lxy.friends==personA.friends); //false</span><br><span class="line">     lxy.friends.push(&quot;friend3&quot;);</span><br><span class="line">     alert(lxy.friends); //friend1,friend2,friend3</span><br><span class="line">     alert(personA.friends); //friend1,friend2</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>实例属性在构造函数中定义，而共享属性constructor和共享方法sayName()在原型中定义。而修改一个实例的friends不会影响其他实例的friends，因为它们引用不同数组，根本没关系。</p>
+<p>这种构造函数与原型混合模式，是目前使用最广泛、认同度最高的一种创建自定义类型的方法。可以说，这是用来定义引用类型的一种默认模式。其实原型就是为构造函数服务的，配合它来创建对象，想要只通过原型一劳永逸的创建对象是不可取的，因为它只管创建共享的属性和方法，剩下的就交给构造函数来完成。</p>
+<h3 id="7-动态原型模式"><a href="#7-动态原型模式" class="headerlink" title="7. 动态原型模式"></a>7. 动态原型模式</h3><p>个人觉得构造函数和原型混合模式已经可以完美的完成任务了。但是动态原型模式的提出是因为混合模式中用了构造函数对象居然还没创建成功，还需要再操作原型，这在其他OO语言开发人员看来很别扭。所以把所有信息都封装到构造函数中，即通过构造函数必要时初始化原型，在构造函数中同时使用了构造函数和原型，这就成了动态原型模式。真正用的时候要通过检查某个应该存在的方法是否有效，来决定是否需要初始化原型。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job) &#123;</span><br><span class="line">        this.name=name;</span><br><span class="line">        this.age=age;</span><br><span class="line">        this.job=job;</span><br><span class="line">        this.friends=[&quot;firend1&quot;,&quot;friend2&quot;];</span><br><span class="line">        if(typeof this.sayName != &quot;function&quot;) &#123;</span><br><span class="line">            alert(&quot;初始化原型&quot;);//只执行一次</span><br><span class="line">            Person.prototype.sayName=function()&#123;</span><br><span class="line">                alert(this.name);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    var personA=new Person(&quot;personA&quot;,25,&quot;Doctor&quot;);</span><br><span class="line">    personA.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用动态原型时，不能使用对象字面量重写原型。如果在已经创建了实例的情况下重写原型，那么就会切断现有实例与新原型之间的联系。</p>
+<h3 id="8-寄生的构造函数模式"><a href="#8-寄生的构造函数模式" class="headerlink" title="8. 寄生的构造函数模式"></a>8. 寄生的构造函数模式</h3><p>在前面几种模式都不适用的情况下，适用寄生（parasitic）构造函数模式。寄生模式其实就是把工厂模式封装在构造函数模式里,即创建一个函数，该函数的作用仅仅是封装创建对象的代码，然后再返回新创建的对象，从表面看，这个函数又很像典型的构造函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        var o=new Object();</span><br><span class="line">        o.name=name;</span><br><span class="line">        o.age=age;</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(this.name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>除了适用new操作符使得该函数成为构造函数外，这个模式和工厂模式一模一样。</p>
+<p>返回的对象和构造函数或者构造的原型属性之间没有任何关系，所以不能用instanceof，这种方式创建的对象和在构造函数外面创建的对象没什么两样。</p>
+<h3 id="9-稳妥的构造函数模式"><a href="#9-稳妥的构造函数模式" class="headerlink" title="9. 稳妥的构造函数模式"></a>9. 稳妥的构造函数模式</h3><p>稳妥的构造函数模式用显式声明的方法来访问属性。</p>
+<p>和这种模式相关的有一个概念：稳妥对象。稳妥对象，指没有公共对象，而且其方法也不引用this的对象。</p>
+<p>稳妥对象最适合在一些安全的环境中（这些环境中会禁用this和new），或者防止数据被其他应用程序（如Mashup）改动时使用。</p>
+<p>稳妥构造函数遵循与寄生构造函数类似的模式，但有两点不同：一是新创建对象的实例方法不引用this，而是不使用new操作符调用构造函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">    function Person(name,age,job)&#123;</span><br><span class="line">        //创建要返回的对象</span><br><span class="line">        var o=new Object();</span><br><span class="line">        //可以在这里定义私有变量和函数</span><br><span class="line">        </span><br><span class="line">        //添加方法</span><br><span class="line">        o.sayName=function()&#123;</span><br><span class="line">            alert(name);</span><br><span class="line">        &#125;</span><br><span class="line">        return o;</span><br><span class="line">    &#125;</span><br><span class="line">    var lxy=new Person(&quot;lxy&quot;,22,&quot;Software Engineer&quot;);</span><br><span class="line">    lxy.sayName();</span><br><span class="line">    alert(lxy.name);//undefined</span><br><span class="line">    alert(lxy.age);//undefined</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>以这种模式创建的对象中，lxy是一个稳妥对象，除了使用sayName()方法外，没有其他方法访问name的值，age，job类似。</p>
+<p>即使有其他代码会给这个对象添加方法或数据成员，但也不可能有别的方法访问传入构造函数中的原始数据。</p>
+<p>与寄生构造函数模式类似，使用稳妥构造函数模式创建的对象与构造函数之间也没有什么关系，因此不能用instanceof操作符。</p>
+<p>各种创建方法问题总结：</p>
+<ol>
+<li>工厂模式：没法知道一对象的类型。</li>
+<li>构造函数：多个实例之间共享方法。</li>
+<li>原型：属性值是引用类型时，一个实例对该属性的修改会影响到其他实例。</li>
+<li>组合使用构造函数模式和原型模式：【推荐】构造函数模式用于定义实例属性，每个实例都有一份实例属性的副本；而原型模式用于定义共享的方法和属性，每个实例同时又共享着对方法的引用</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Evan625
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://notes.itxds.cn/2017/js-series-one-create-object/" title="JavaScript系列之一：创建对象">https://notes.itxds.cn/2017/js-series-one-create-object/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/JavaScript/" rel="tag"><i class="fa fa-tag"></i> JavaScript</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/ci-travis-hexo-github-one/" rel="prev" title="使用Github和TravisCI对Hexo持续集成">
+                  <i class="fa fa-chevron-left"></i> 使用Github和TravisCI对Hexo持续集成
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018/centos-series-one-vmwaretools/" rel="next" title="Centos系列之一：Centos7安装VMwareTools">
+                  Centos系列之一：Centos7安装VMwareTools <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Evan625</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"Liyp625","repo":"notes","client_id":"a51be3c83bfd30b0be6d","client_secret":"2a36b54f3e13f496818cae25796a77d7f555f919","admin_user":"Liyp625","distraction_free_mode":false,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"9fe6ef9c65d73844ec48153bad9cab8a"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haruto.model.json"},"display":{"position":"left","width":150,"height":240,"hOffset":80,"vOffset":0},"mobile":{"show":false},"react":{"opacity":0.8},"log":false});</script></body>
+</html>
