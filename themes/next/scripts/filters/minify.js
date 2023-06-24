@@ -112,6 +112,7 @@ hexo.extend.filter.register('after_generate', () => {
   // Search
   if (!theme.algolia_search.enable) {
     hexo.route.remove('js/third-party/search/algolia-search.js');
+    hexo.route.remove('images/logo-algolia-nebula-blue-full.svg');
   }
 
   if (!theme.local_search.enable) {
@@ -136,6 +137,10 @@ hexo.extend.filter.register('after_generate', () => {
     hexo.route.remove('js/third-party/tags/pdf.js');
   }
 
+  if (!theme.wavedrom.enable) {
+    hexo.route.remove('js/third-party/tags/wavedrom.js');
+  }
+
   // Others
   if (!theme.fancybox) {
     hexo.route.remove('js/third-party/fancybox.js');
@@ -147,9 +152,5 @@ hexo.extend.filter.register('after_generate', () => {
 
   if (!theme.quicklink.enable) {
     hexo.route.remove('js/third-party/quicklink.js');
-  }
-
-  if (!theme.rating.enable) {
-    hexo.route.remove('js/third-party/rating.js');
   }
 });
